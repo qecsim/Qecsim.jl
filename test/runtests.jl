@@ -1,6 +1,3 @@
-using Qecsim
-using Test
+using SafeTestsets
 
-@testset "Qecsim.jl" begin
-    # Write your tests here.
-end
+@safetestset "poc" begin include("poc.jl") end
