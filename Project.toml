@@ -1,0 +1,13 @@
+name = "Qecsim"
+uuid = "e6c2bad3-a74c-45bb-aaa0-aff4e9ffa0d7"
+authors = ["David K. Tuckett", "Terry Farrelly"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
