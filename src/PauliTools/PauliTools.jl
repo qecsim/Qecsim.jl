@@ -1,9 +1,15 @@
+"""
+Tools for Pauli strings and binary symplectic vectors / matrices.
+"""
 module PauliTools
 
 function hello(s)
     "Hello $s"
 end
 
+"""
+    bsp(A::BitArray, B::BitArray)::Array{Int}
+"""
 function bsp(a::AbstractArray{Bool}, b::AbstractArray{Bool})
     # circshift b by half its 1st dimension to emulate symplectic product
     mod.(a * circshift(b, size(b, 1)/2), 2)  # mod elements to base 2

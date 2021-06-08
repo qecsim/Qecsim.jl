@@ -2,7 +2,6 @@ using Qecsim: PauliTools as PT
 using Test
 
 @testset "PauliTools.jl" begin
-    @test PT.hello("Boo") == "Hello Boo"
 
     @testset "bsp" begin
         # III bsp III commute

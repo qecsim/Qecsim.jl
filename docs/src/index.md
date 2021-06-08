@@ -2,13 +2,13 @@
 CurrentModule = Qecsim
 ```
 
-# Qecsim
+# Qecsim.jl - Quantum Error Correction Simulator
 
-Documentation for [Qecsim](https://github.com/dkt29/Qecsim.jl).
+[Qecsim.jl](https://github.com/dkt29/Qecsim.jl) is a Julia package for simulating quantum
+error correction using stabilizer codes.
 
-```@index
-```
+## Contents
 
-```@autodocs
-Modules = [Qecsim]
+```@contents
+Pages = ["api.md", "api_index.md"]
 ```
