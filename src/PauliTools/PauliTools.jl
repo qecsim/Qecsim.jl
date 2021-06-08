@@ -5,10 +5,8 @@ function hello(s)
 end
 
 function bsp(a::AbstractArray{Bool}, b::AbstractArray{Bool})
-    println("$(typeof(a)): $a")
-    println("$(typeof(b)): $b")
-    println("shifted b: ", circshift(b, size(b, 1)/2))
-    mod.(a * circshift(b, size(b, 1)/2), 2)
+    # circshift b by half its 1st dimension to emulate symplectic product
+    mod.(a * circshift(b, size(b, 1)/2), 2)  # mod elements to base 2
 end
 
 end
