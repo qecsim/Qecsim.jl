@@ -1,4 +1,4 @@
-import Qecsim.PauliTools as PT
+using Qecsim: PauliTools as PT
 using Test
 
 @testset "PauliTools.jl" begin
