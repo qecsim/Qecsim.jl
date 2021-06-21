@@ -22,4 +22,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/dkt29/Qecsim.jl",
+    devbranch = "main",
 )
