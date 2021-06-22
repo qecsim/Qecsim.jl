@@ -6,6 +6,8 @@ module Qecsim
 export doubler
 include("poc.jl")
 
-include("PauliTools/PauliTools.jl")
+include("PauliTools.jl")
+include("Model.jl")
+include("Models/Models.jl")
 
 end
