@@ -5,6 +5,7 @@ import ...Model
 using ...Model:StabilizerCode
 
 struct BasicCode <: StabilizerCode
+    # TODO: Should we parameterize type with AbstractString?
     label::String
     function BasicCode(label::Union{String, Nothing}=nothing)
         # TODO: Should label be a keyword argument with nkd?
