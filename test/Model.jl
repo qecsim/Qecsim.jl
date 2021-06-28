@@ -2,9 +2,16 @@ using Qecsim:Model
 using Qecsim.Models:Basic
 
 @testset "StabilizerCode" begin
-    label = "my-basic-code"
-    code = Basic.BasicCode(label)
-    @test code.label == label
-    @test Model.label(code) == label
-    @test Model.label(Basic.BasicCode()) == "BasicCode"
+    # 5-qubit code
+    code = Basic.BasicCode(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"], ["XXXXX"], ["ZZZZZ"])
+    Model.validate(code)
+    # Non-commuting stabilizers
+    code = Basic.BasicCode(["XXXXI", "IXZZX", "XIXZZ", "ZXIXZ"], ["XXXXX"], ["ZZZZZ"])
+    @test_throws AssertionError Model.validate(code)
+    # Non-commuting stabilizers with logicals
+    code = Basic.BasicCode(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"], ["XXXII"], ["IIZZZ"])
+    @test_throws AssertionError Model.validate(code)
+    # Commuting logicals
+    code = Basic.BasicCode(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"], ["IIIII"], ["IIIII"])
+    @test_throws AssertionError Model.validate(code)
 end

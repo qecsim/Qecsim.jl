@@ -25,6 +25,7 @@ function validate(code::StabilizerCode)
     s, l = stabilizers(code), logicals(code)
     @assert all(PT.bsp(s, transpose(s)) .== 0)
     @assert all(PT.bsp(s, transpose(l)) .== 0)
+    # twisted identity with same size as logicals
     # TODO: complete
 end
 
