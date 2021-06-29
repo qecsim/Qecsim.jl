@@ -14,7 +14,7 @@ The binary symplectic product ``\odot`` is defined as
 
 # Examples
 ```jldoctest
-julia> using Qecsim: PauliTools as PT
+julia> using Qecsim:PauliTools as PT
 
 julia> a = BitVector([1, 0, 0, 0]);  # XI
 
@@ -24,7 +24,7 @@ julia> PT.bsp(a', b)
 1
 ```
 ```jldoctest
-julia> using Qecsim: PauliTools as PT
+julia> using Qecsim:PauliTools as PT
 
 julia> stabilizers = BitMatrix(  # 5-qubit stabilizers
        [1 0 0 1 0 0 1 1 0 0     # XZZXI
@@ -48,16 +48,49 @@ function bsp(a::AbstractVecOrMat{Bool}, b::AbstractVecOrMat{Bool})
 end
 
 """
-    pauli_to_bsf(pauli)
+    bsf_to_pauli(bsf::Union{BitVector, BitMatrix})
 
-Convert the Pauli operator(s) to binary symplectic form.
+Convert binary symplectic form to Pauli operator(s).
 
-A single string is converted to a vector. A collection of strings is converted to a matrix
-where each row corresponds to a pauli.
+A vector is converted to a single Pauli string. A matrix is converted row-by-row to a
+collection of Pauli strings.
 
 # Examples
 ```jldoctest
-julia> using Qecsim: PauliTools as PT
+julia> using Qecsim:PauliTools as PT
+
+julia> PT.bsf_to_pauli(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1]))
+"XIZIY"
+```
+```jldoctest
+julia> using Qecsim:PauliTools as PT
+
+julia> PT.bsf_to_pauli(BitMatrix([1 0 0 0 1 0 0 1 0 1; 0 1 0 1 0 0 0 1 1 0]))
+2-element Vector{String}:
+ "XIZIY"
+ "IXZYI"
+```
+"""
+function bsf_to_pauli(bsf::AbstractVector{Bool})
+    l = length(bsf)  # bsf = (1 0 0 0 1 | 0 0 1 0 1)
+    x, z = bsf[1:l÷2], bsf[l÷2+1:end]  # x = (1 0 0 0 1), z = (0 0 1 0 1)
+    String(map(i -> "IXZY"[i+1], x+2z))  # x+2z = (1 0 2 0 3) -> "XIZIY"
+end
+function bsf_to_pauli(bsfs::AbstractMatrix{Bool})
+    String[bsf_to_pauli(bsf) for bsf in eachrow(bsfs)]
+end
+
+"""
+    pauli_to_bsf(pauli::Union{String, Iterable of String})
+
+Convert the Pauli operator(s) to binary symplectic form.
+
+A single Pauli string is converted to a vector. A collection of Pauli strings is converted
+to a matrix where each row corresponds to a Pauli.
+
+# Examples
+```jldoctest
+julia> using Qecsim:PauliTools as PT
 
 julia> PT.pauli_to_bsf("XIZIY")
 10-element BitVector:
@@ -73,7 +106,7 @@ julia> PT.pauli_to_bsf("XIZIY")
  1
 ```
 ```jldoctest
-julia> using Qecsim: PauliTools as PT
+julia> using Qecsim:PauliTools as PT
 
 julia> PT.pauli_to_bsf(["XIZIY", "IXZYI"])
 2×10 BitMatrix:
@@ -88,13 +121,6 @@ function pauli_to_bsf(pauli::AbstractString)
 end
 function pauli_to_bsf(paulis)
     vcat((transpose(pauli_to_bsf(p)) for p in paulis)...)
-end
-
-function bsf_to_pauli(bsf::AbstractVector{Bool})
-    nothing
-end
-function bsf_to_pauli(bsfs::AbstractMatrix{Bool})
-    nothing
 end
 
 end
