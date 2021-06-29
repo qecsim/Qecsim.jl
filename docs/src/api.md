@@ -9,8 +9,30 @@ Modules = [Qecsim]
 Order   = [:constant, :type, :function, :macro]
 ```
 
-## PauliTools
+## Model
+```@meta
+CurrentModule = Qecsim.Model
+```
+```@docs
+Model
+```
+### Model.StabilizerCode
+```@docs
+Model.StabilizerCode
+Model.label
+Model.logical_xs
+Model.logical_zs
+Model.logicals
+Model.nkd
+Model.stabilizers
+Model.validate
+```
+### Model.ErrorModel
 
+## PauliTools
+```@meta
+CurrentModule = Qecsim.PauliTools
+```
 ```@autodocs
-Modules = [Qecsim.PauliTools]
+Modules = [PauliTools]
 ```
