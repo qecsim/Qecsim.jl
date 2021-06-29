@@ -1,10 +1,12 @@
 using Qecsim:Model
 using Qecsim.Models:Basic
+using Qecsim:PauliTools as PT
 
 @testset "StabilizerCode" begin
     # 5-qubit code
     code = Basic.BasicCode(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"], ["XXXXX"], ["ZZZZZ"])
-    Model.validate(code)
+    @test Model.logicals(code) == PT.pauli_to_bsf(["XXXXX", "ZZZZZ"])
+    @test Model.validate(code) === nothing
     # Non-commuting stabilizers
     code = Basic.BasicCode(["XXXXI", "IXZZX", "XIXZZ", "ZXIXZ"], ["XXXXX"], ["ZZZZZ"])
     @test_throws AssertionError Model.validate(code)

@@ -28,4 +28,14 @@ Model.logical_zs(code::BasicCode) = code.logical_zs
 Model.nkd(code::BasicCode) = code.nkd
 Model.label(code::BasicCode) = code.label
 
+function FiveQubitCode()
+    BasicCode(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"],
+        ["XXXXX"], ["ZZZZZ"]; nkd=(5, 1, 3), label="5-qubit")
+end
+
+function SteaneCode()
+    BasicCode(["IIIXXXX", "IXXIIXX", "XIXIXIX", "IIIZZZZ", "IZZIIZZ", "ZIZIZIZ"],
+        ["XXXXXXX"], ["ZZZZZZZ"]; nkd=(7, 1, 3), label="Steane")
+end
+
 end
