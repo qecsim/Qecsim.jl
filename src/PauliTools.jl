@@ -4,7 +4,7 @@ Tools for Pauli strings and binary symplectic vectors / matrices.
 module PauliTools
 
 @doc raw"""
-    bsp(A::BitArray, B::BitArray)
+    bsp(A::Union{BitVector, BitMatrix}, B::Union{BitVector, BitMatrix})
 
 Return the binary symplectic product of A with B, given in binary symplectic form.
 
@@ -42,7 +42,7 @@ julia> PT.bsp(stabilizers, error)
  0
 ```
 """
-function bsp(a::AbstractArray{Bool}, b::AbstractArray{Bool})
+function bsp(a::AbstractVecOrMat{Bool}, b::AbstractVecOrMat{Bool})
     # circshift b by half its 1st dimension to emulate symplectic product
     mod.(a * circshift(b, size(b, 1)/2), 2)  # mod elements to base 2
 end
@@ -50,9 +50,10 @@ end
 """
     pauli_to_bsf(pauli)
 
-Convert the Pauli operator(s) to binary symplectic form. A single string is converted to a
-vector. A collection of strings is converted to a matrix where each row corresponds to a
-pauli.
+Convert the Pauli operator(s) to binary symplectic form.
+
+A single string is converted to a vector. A collection of strings is converted to a matrix
+where each row corresponds to a pauli.
 
 # Examples
 ```jldoctest
@@ -87,6 +88,13 @@ function pauli_to_bsf(pauli::AbstractString)
 end
 function pauli_to_bsf(paulis)
     vcat((transpose(pauli_to_bsf(p)) for p in paulis)...)
+end
+
+function bsf_to_pauli(bsf::AbstractVector{Bool})
+    nothing
+end
+function bsf_to_pauli(bsfs::AbstractMatrix{Bool})
+    nothing
 end
 
 end
