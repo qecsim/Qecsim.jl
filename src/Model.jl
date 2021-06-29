@@ -24,12 +24,12 @@ function nkd end
 function label end
 function validate(code::StabilizerCode)
     s, l = stabilizers(code), logicals(code)
-    @assert all(PT.bsp(s, transpose(s)) .== 0)
-    @assert all(PT.bsp(s, transpose(l)) .== 0)
+    @assert all(PT.bsp(s, transpose(s)) .== 0) "Stabilizers do not mutually commute."
+    @assert all(PT.bsp(s, transpose(l)) .== 0) "Stabilizers do not commute with logicals."
     # twisted identity with same size as logicals
     nlogicals = size(l, 1)
     twistedI = circshift(Matrix(I, nlogicals, nlogicals), nlogicals / 2)
-    @assert PT.bsp(l, transpose(l)) == twistedI
+    @assert PT.bsp(l, transpose(l)) == twistedI "Logicals do not mutually twist commute."
 end
 
 end
