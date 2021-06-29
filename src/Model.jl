@@ -1,5 +1,6 @@
 module Model
 
+using LinearAlgebra
 using Qecsim:PauliTools as PT
 
 """
@@ -26,7 +27,9 @@ function validate(code::StabilizerCode)
     @assert all(PT.bsp(s, transpose(s)) .== 0)
     @assert all(PT.bsp(s, transpose(l)) .== 0)
     # twisted identity with same size as logicals
-    # TODO: complete
+    nlogicals = size(l, 1)
+    twistedI = circshift(Matrix(I, nlogicals, nlogicals), nlogicals / 2)
+    @assert PT.bsp(l, transpose(l)) == twistedI
 end
 
 end

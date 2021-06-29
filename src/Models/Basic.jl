@@ -15,7 +15,7 @@ end
 function BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs;
                    nkd=nothing, label=nothing)
     nkd = !isnothing(nkd) ? nkd : (
-        length(pauli_stabilizers) > 0 ? length(pauli_stabilizers[0]) : 0,
+        length(pauli_stabilizers) > 0 ? length(pauli_stabilizers[1]) : 0,
         length(pauli_logical_xs),
         nothing)
     label = !isnothing(label) ? label : "Basic [$(nkd[1]),$(nkd[2]),$(nkd[3])]"
