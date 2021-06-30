@@ -3,6 +3,8 @@ Tools for Pauli strings and binary symplectic vectors / matrices.
 """
 module PauliTools
 
+export bsp, bsf_to_pauli, pauli_to_bsf
+
 @doc raw"""
     bsp(A::Union{BitVector, BitMatrix}, B::Union{BitVector, BitMatrix})
 
@@ -14,18 +16,14 @@ The binary symplectic product ``\odot`` is defined as
 
 # Examples
 ```jldoctest
-julia> using Qecsim:PauliTools as PT
-
 julia> a = BitVector([1, 0, 0, 0]);  # XI
 
 julia> b = BitVector([0, 0, 1, 0]);  # ZI
 
-julia> PT.bsp(a', b)
+julia> bsp(a', b)
 1
 ```
 ```jldoctest
-julia> using Qecsim:PauliTools as PT
-
 julia> stabilizers = BitMatrix(  # 5-qubit stabilizers
        [1 0 0 1 0 0 1 1 0 0     # XZZXI
         0 1 0 0 1 0 0 1 1 0     # IXZZX
@@ -34,7 +32,7 @@ julia> stabilizers = BitMatrix(  # 5-qubit stabilizers
 
 julia> error = BitVector([0, 0, 1, 1, 0, 0, 1, 0, 1, 0]);  # IZXYI
 
-julia> PT.bsp(stabilizers, error)
+julia> bsp(stabilizers, error)
 4-element Vector{Int64}:
  0
  1
@@ -57,15 +55,11 @@ collection of Pauli strings.
 
 # Examples
 ```jldoctest
-julia> using Qecsim:PauliTools as PT
-
-julia> PT.bsf_to_pauli(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1]))
+julia> bsf_to_pauli(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1]))
 "XIZIY"
 ```
 ```jldoctest
-julia> using Qecsim:PauliTools as PT
-
-julia> PT.bsf_to_pauli(BitMatrix([1 0 0 0 1 0 0 1 0 1; 0 1 0 1 0 0 0 1 1 0]))
+julia> bsf_to_pauli(BitMatrix([1 0 0 0 1 0 0 1 0 1; 0 1 0 1 0 0 0 1 1 0]))
 2-element Vector{String}:
  "XIZIY"
  "IXZYI"
@@ -90,9 +84,7 @@ to a matrix where each row corresponds to a Pauli.
 
 # Examples
 ```jldoctest
-julia> using Qecsim:PauliTools as PT
-
-julia> PT.pauli_to_bsf("XIZIY")
+julia> pauli_to_bsf("XIZIY")
 10-element BitVector:
  1
  0
@@ -106,9 +98,7 @@ julia> PT.pauli_to_bsf("XIZIY")
  1
 ```
 ```jldoctest
-julia> using Qecsim:PauliTools as PT
-
-julia> PT.pauli_to_bsf(["XIZIY", "IXZYI"])
+julia> pauli_to_bsf(["XIZIY", "IXZYI"])
 2×10 BitMatrix:
  1  0  0  0  1  0  0  1  0  1
  0  1  0  1  0  0  0  1  1  0

@@ -6,6 +6,9 @@ module Model
 using LinearAlgebra:I
 using Qecsim:PauliTools as PT
 
+export StabilizerCode
+export stabilizers, logical_xs, logical_zs, logicals, nkd, label, validate
+
 """
 Abstract supertype for stabilizer codes.
 """

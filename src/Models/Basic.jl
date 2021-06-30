@@ -8,6 +8,8 @@ import Qecsim.Model
 using Qecsim.Model:StabilizerCode
 using Qecsim:PauliTools as PT
 
+export BasicCode, FiveQubitCode, SteaneCode
+
 """
     BasicCode <: StabilizerCode
 
@@ -33,18 +35,16 @@ logical qubit. Optional `nkd` defaults to `n` and `k` evaluated and `d` nothing.
 
 # Examples
 ```jldoctest
-julia> using Qecsim.Models:Basic
+julia> using Qecsim.Model
 
-julia> using Qecsim:Model
+julia> code = BasicCode(["ZZI", "IZZ"], ["XXX"], ["IIZ"]);  # 3-qubit repetition
 
-julia> code = Basic.BasicCode(["ZZI", "IZZ"], ["XXX"], ["IIZ"]);  # 3-qubit repetition
+julia> validate(code)  # no error indicates operators satisfy commutation relations
 
-julia> Model.validate(code)  # no error indicates operators satisfy commutation relations
-
-julia> Model.nkd(code)  # default nkd
+julia> nkd(code)  # default nkd
 (3, 1, nothing)
 
-julia> Model.label(code)  # default label
+julia> label(code)  # default label
 "Basic [3,1,nothing]"
 ```
 """

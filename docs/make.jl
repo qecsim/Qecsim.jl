@@ -2,6 +2,9 @@ using Qecsim
 using Documenter
 
 DocMeta.setdocmeta!(Qecsim, :DocTestSetup, :(using Qecsim); recursive=true)
+DocMeta.setdocmeta!(Qecsim.PauliTools, :DocTestSetup, :(using Qecsim.PauliTools))
+DocMeta.setdocmeta!(Qecsim.Model, :DocTestSetup, :(using Qecsim.Model))
+DocMeta.setdocmeta!(Qecsim.Models.Basic, :DocTestSetup, :(using Qecsim.Models.Basic))
 
 makedocs(;
     modules=[Qecsim],

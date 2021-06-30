@@ -1,5 +1,6 @@
-using Qecsim:Model
-using Qecsim.Models:Basic
+using Test
+using Qecsim.Model
+using Qecsim.Models.Basic
 using Qecsim:PauliTools as PT
 
 
@@ -7,27 +8,27 @@ using Qecsim:PauliTools as PT
     pauli_stabilizers = ["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"]
     pauli_logical_xs = ["XXXXX"]
     pauli_logical_zs = ["ZZZZZ"]
-    nkd = (5, 1, 3)
-    label = "5-qubit"
-    code = Basic.BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs;
-        nkd=nkd, label=label)
-    @test Model.nkd(code) == nkd
-    @test Model.label(code) == label
-    @test Model.stabilizers(code) == PT.pauli_to_bsf(pauli_stabilizers)
-    @test Model.logical_xs(code) == PT.pauli_to_bsf(pauli_logical_xs)
-    @test Model.logical_zs(code) == PT.pauli_to_bsf(pauli_logical_zs)
+    my_nkd = (5, 1, 3)
+    my_label = "5-qubit"
+    code = BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs;
+        nkd=my_nkd, label=my_label)
+    @test nkd(code) == my_nkd
+    @test label(code) == my_label
+    @test stabilizers(code) == PT.pauli_to_bsf(pauli_stabilizers)
+    @test logical_xs(code) == PT.pauli_to_bsf(pauli_logical_xs)
+    @test logical_zs(code) == PT.pauli_to_bsf(pauli_logical_zs)
     # defaults
-    code = Basic.BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs)
-    @test Model.nkd(code) == (5, 1, nothing)
-    @test isa(Model.label(code), String)
+    code = BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs)
+    @test nkd(code) == (5, 1, nothing)
+    @test isa(label(code), String)
     # 5-qubit
-    code = Basic.FiveQubitCode()
-    @test Model.nkd(code) == (5, 1, 3)
-    @test Model.label(code) == "5-qubit"
-    @test Model.validate(code) === nothing  # no error
+    code = FiveQubitCode()
+    @test nkd(code) == (5, 1, 3)
+    @test label(code) == "5-qubit"
+    @test validate(code) === nothing  # no error
     # Steane
-    code = Basic.SteaneCode()
-    @test Model.nkd(code) == (7, 1, 3)
-    @test Model.label(code) == "Steane"
-    @test Model.validate(code) === nothing  # no error
+    code = SteaneCode()
+    @test nkd(code) == (7, 1, 3)
+    @test label(code) == "Steane"
+    @test validate(code) === nothing  # no error
 end
