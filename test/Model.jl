@@ -1,6 +1,6 @@
 using Test
 using Qecsim.Model
-using Qecsim.Models.Basic
+using Qecsim.BasicModels
 using Qecsim:PauliTools as PT
 
 @testset "StabilizerCode" begin

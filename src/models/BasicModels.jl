@@ -1,7 +1,7 @@
 """
 Basic stabilizer codes
 """
-module Basic
+module BasicModels
 
 import Qecsim.Model
 
@@ -35,7 +35,7 @@ logical qubit. Optional `nkd` defaults to `n` and `k` evaluated and `d` nothing.
 
 # Examples
 ```jldoctest
-julia> using Qecsim.Models.Basic
+julia> using Qecsim.BasicModels
 
 julia> code = BasicCode(["ZZI", "IZZ"], ["XXX"], ["IIZ"]);  # 3-qubit repetition
 
