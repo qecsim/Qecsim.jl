@@ -35,7 +35,7 @@ logical qubit. Optional `nkd` defaults to `n` and `k` evaluated and `d` nothing.
 
 # Examples
 ```jldoctest
-julia> using Qecsim.Model
+julia> using Qecsim.Models.Basic
 
 julia> code = BasicCode(["ZZI", "IZZ"], ["XXX"], ["IIZ"]);  # 3-qubit repetition
 
