@@ -1,3 +1,6 @@
+"""
+Basic stabilizer codes
+"""
 module Basic
 
 import Qecsim.Model
@@ -5,6 +8,11 @@ import Qecsim.Model
 using Qecsim.Model:StabilizerCode
 using Qecsim:PauliTools as PT
 
+"""
+    BasicCode <: StabilizerCode
+
+Basic code defined by its stabilizers and logical operators.
+"""
 struct BasicCode <: StabilizerCode
     stablizers::BitMatrix
     logical_xs::BitMatrix
@@ -12,6 +20,34 @@ struct BasicCode <: StabilizerCode
     nkd::Tuple{Int, Int, Union{Int,Nothing}}
     label::String
 end
+"""
+    BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs; nkd=nothing,
+        label=nothing)
+
+Construct a basic code from string representations of stabilizers and logical operators.
+
+Paulis are expressed as strings of capitalized I, X, Y, Z characters, with one character per
+physical qubit. Logical X and Z operators are in matching order, with one of each for each
+logical qubit. Optional `nkd` defaults to `n` and `k` evaluated and `d` nothing. Optional
+`label` defaults to "Basic [n, k, d]".
+
+# Examples
+```jldoctest
+julia> using Qecsim.Models:Basic
+
+julia> using Qecsim:Model
+
+julia> code = Basic.BasicCode(["ZZI", "IZZ"], ["XXX"], ["IIZ"]);  # 3-qubit repetition
+
+julia> Model.validate(code)  # no error indicates operators satisfy commutation relations
+
+julia> Model.nkd(code)  # default nkd
+(3, 1, nothing)
+
+julia> Model.label(code)  # default label
+"Basic [3,1,nothing]"
+```
+"""
 function BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs;
                    nkd=nothing, label=nothing)
     nkd = !isnothing(nkd) ? nkd : (
@@ -28,11 +64,21 @@ Model.logical_zs(code::BasicCode) = code.logical_zs
 Model.nkd(code::BasicCode) = code.nkd
 Model.label(code::BasicCode) = code.label
 
+"""
+    FiveQubitCode()
+
+Construct 5-qubit [5,1,3] code as a [`BasicCode`](@ref).
+"""
 function FiveQubitCode()
     BasicCode(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"],
         ["XXXXX"], ["ZZZZZ"]; nkd=(5, 1, 3), label="5-qubit")
 end
 
+"""
+    SteaneCode()
+
+Construct Steane [7,1,3] code as a [`BasicCode`](@ref).
+"""
 function SteaneCode()
     BasicCode(["IIIXXXX", "IXXIIXX", "XIXIXIX", "IIIZZZZ", "IZZIIZZ", "ZIZIZIZ"],
         ["XXXXXXX"], ["ZZZZZZZ"]; nkd=(7, 1, 3), label="Steane")

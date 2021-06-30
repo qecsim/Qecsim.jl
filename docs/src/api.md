@@ -29,6 +29,14 @@ Model.validate
 ```
 ### Model.ErrorModel
 
+## Models.Basic
+```@meta
+CurrentModule = Qecsim.Models.Basic
+```
+```@autodocs
+Modules = [Basic]
+```
+
 ## PauliTools
 ```@meta
 CurrentModule = Qecsim.PauliTools
