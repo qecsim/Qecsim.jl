@@ -110,7 +110,11 @@ function pauli_to_bsf(pauli::AbstractString)
     vcat((p .== 'X') .| ys, (p .== 'Z') .| ys)
 end
 function pauli_to_bsf(paulis)
-    vcat((transpose(pauli_to_bsf(p)) for p in paulis)...)
+    # for each pauli, if string convert to bsf, transpose and concatenate
+    # note: type test is required to avoid infinite recursion for invalid types
+    vcat((isa(p, AbstractString) ? transpose(pauli_to_bsf(p))
+          : throw(ArgumentError("invalid pauli type: $(typeof(p))"))
+          for p in paulis)...)
 end
 
 end

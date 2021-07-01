@@ -76,4 +76,6 @@ end
         [1 1 1 1 1 0 0 0 0 0
          0 0 0 0 0 1 1 1 1 1
          1 1 1 1 1 1 1 1 1 1])
+    # ArgumentError: fail-fast if eltype is not string
+    @test_throws ArgumentError pauli_to_bsf(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1]))
 end
