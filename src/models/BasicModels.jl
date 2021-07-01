@@ -6,7 +6,7 @@ module BasicModels
 import Qecsim.Model
 
 using Qecsim.Model:StabilizerCode
-using Qecsim:PauliTools as PT
+using Qecsim.PauliTools:to_bsf
 
 export BasicCode, FiveQubitCode, SteaneCode
 
@@ -55,8 +55,8 @@ function BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs;
         length(pauli_logical_xs),
         nothing)
     label = !isnothing(label) ? label : "Basic [$(nkd[1]),$(nkd[2]),$(nkd[3])]"
-    BasicCode(PT.pauli_to_bsf(pauli_stabilizers), PT.pauli_to_bsf(pauli_logical_xs),
-              PT.pauli_to_bsf(pauli_logical_zs), nkd, label)
+    BasicCode(to_bsf(pauli_stabilizers), to_bsf(pauli_logical_xs),
+        to_bsf(pauli_logical_zs), nkd, label)
 end
 Model.stabilizers(code::BasicCode) = code.stablizers
 Model.logical_xs(code::BasicCode) = code.logical_xs

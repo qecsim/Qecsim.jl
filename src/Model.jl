@@ -4,7 +4,7 @@ Abstract types and methods for codes, error models and decoders.
 module Model
 
 using LinearAlgebra:I
-using Qecsim:PauliTools as PT
+using Qecsim.PauliTools:bsp
 
 export StabilizerCode
 export stabilizers, logical_xs, logical_zs, logicals, nkd, label, validate
@@ -102,16 +102,16 @@ An `AssertionError` is thrown if any of the following fail:
   * ``L \odot L^T = \Lambda``
 
 where ``S`` and ``L`` are the code [`stabilizers`](@ref) and [`logicals`](@ref),
-respectively, and ``\odot`` and ``\Lambda`` are defined in [`PT.bsp`](@ref).
+respectively, and ``\odot`` and ``\Lambda`` are defined in [`bsp`](@ref).
 """
 function validate(code::StabilizerCode)
     s, l = stabilizers(code), logicals(code)
-    @assert all(PT.bsp(s, transpose(s)) .== 0) "Stabilizers do not mutually commute."
-    @assert all(PT.bsp(s, transpose(l)) .== 0) "Stabilizers do not commute with logicals."
+    @assert all(bsp(s, transpose(s)) .== 0) "Stabilizers do not mutually commute."
+    @assert all(bsp(s, transpose(l)) .== 0) "Stabilizers do not commute with logicals."
     # twisted identity with same size as logicals
     nlogicals = size(l, 1)
     twistedI = circshift(Matrix(I, nlogicals, nlogicals), nlogicals / 2)
-    @assert PT.bsp(l, transpose(l)) == twistedI "Logicals do not mutually twist commute."
+    @assert bsp(l, transpose(l)) == twistedI "Logicals do not mutually twist commute."
 end
 
 end

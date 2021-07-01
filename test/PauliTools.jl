@@ -44,38 +44,38 @@ using Qecsim.PauliTools
     @test bsp(errors', stabilizers') == commutations'
 end
 
-@testset "bsf_to_pauli" begin
+@testset "to_pauli" begin
     # Single bsf
-    @test bsf_to_pauli(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1])) == "XIZIY"
-    @test bsf_to_pauli(BitVector([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])) == "IIIII"
-    @test bsf_to_pauli(BitVector([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])) == "XXXXX"
-    @test bsf_to_pauli(BitVector([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])) == "ZZZZZ"
-    @test bsf_to_pauli(BitVector([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])) == "YYYYY"
+    @test to_pauli(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1])) == "XIZIY"
+    @test to_pauli(BitVector([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])) == "IIIII"
+    @test to_pauli(BitVector([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])) == "XXXXX"
+    @test to_pauli(BitVector([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])) == "ZZZZZ"
+    @test to_pauli(BitVector([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])) == "YYYYY"
     # Multiple bsfs
-    @test bsf_to_pauli(BitMatrix(
+    @test to_pauli(BitMatrix(
         [1 0 0 0 1 0 0 1 0 1
          0 1 0 1 0 0 0 1 1 0])) == ["XIZIY", "IXZYI"]
-    @test bsf_to_pauli(BitMatrix(
+    @test to_pauli(BitMatrix(
         [1 1 1 1 1 0 0 0 0 0
          0 0 0 0 0 1 1 1 1 1
          1 1 1 1 1 1 1 1 1 1])) == ["XXXXX", "ZZZZZ", "YYYYY"]
     end
 
-@testset "pauli_to_bsf" begin
+@testset "to_bsf" begin
     # Single Paulis
-    @test pauli_to_bsf("XIZIY") == BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1])
-    @test pauli_to_bsf("IIIII") == BitVector([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    @test pauli_to_bsf("XXXXX") == BitVector([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
-    @test pauli_to_bsf("ZZZZZ") == BitVector([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
-    @test pauli_to_bsf("YYYYY") == BitVector([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+    @test to_bsf("XIZIY") == BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1])
+    @test to_bsf("IIIII") == BitVector([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    @test to_bsf("XXXXX") == BitVector([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
+    @test to_bsf("ZZZZZ") == BitVector([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
+    @test to_bsf("YYYYY") == BitVector([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
     # Multiple Paulis
-    @test pauli_to_bsf(["XIZIY", "IXZYI"]) == BitMatrix(
+    @test to_bsf(["XIZIY", "IXZYI"]) == BitMatrix(
         [1 0 0 0 1 0 0 1 0 1
          0 1 0 1 0 0 0 1 1 0])
-    @test pauli_to_bsf(["XXXXX", "ZZZZZ", "YYYYY"]) == BitMatrix(
+    @test to_bsf(["XXXXX", "ZZZZZ", "YYYYY"]) == BitMatrix(
         [1 1 1 1 1 0 0 0 0 0
          0 0 0 0 0 1 1 1 1 1
          1 1 1 1 1 1 1 1 1 1])
     # ArgumentError: fail-fast if eltype is not string
-    @test_throws ArgumentError pauli_to_bsf(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1]))
+    @test_throws ArgumentError to_bsf(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1]))
 end
