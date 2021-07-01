@@ -1,4 +1,4 @@
-# API
+# Core
 
 ## Qecsim
 ```@docs
@@ -35,14 +35,4 @@ CurrentModule = Qecsim.PauliTools
 ```
 ```@autodocs
 Modules = [PauliTools]
-```
-
-## Models
-
-### BasicModels
-```@meta
-CurrentModule = Qecsim.BasicModels
-```
-```@autodocs
-Modules = [BasicModels]
 ```
