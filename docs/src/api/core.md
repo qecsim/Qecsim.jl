@@ -35,6 +35,7 @@ Model.validate
 ```@docs
 Model.ErrorModel
 Model.generate
+Model.probability_distribution
 ```
 
 ## PauliTools
