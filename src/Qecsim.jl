@@ -5,17 +5,16 @@ module Qecsim
 
 using Reexport
 
-export doubler
-include("poc.jl")
+export QecsimError
+include("error.jl")
 
-# include core sub-modules
+# include core sub-modules (and reexport)
 include("PauliTools.jl")
 include("Model.jl")
-# reexport core sub-module exports
 @reexport using Qecsim.PauliTools
 @reexport using Qecsim.Model
 
-# include implementation sub-modules
+# include implementation sub-modules (not reexported)
 include("models/BasicModels.jl")
 
 end

@@ -4,6 +4,7 @@ Abstract types and methods for codes, error models and decoders.
 module Model
 
 using LinearAlgebra:I
+using Qecsim:QecsimError
 using Qecsim.PauliTools:bsp
 
 export StabilizerCode
@@ -95,7 +96,7 @@ function label end
 
 Perform sanity checks.
 
-An `AssertionError` is thrown if any of the following fail:
+If any of the following fail then a [`QecsimError`](@ref) is thrown:
 
   * ``S \odot S^T = 0``
   * ``S \odot L^T = 0``
@@ -106,12 +107,16 @@ respectively, and ``\odot`` and ``\Lambda`` are defined in [`bsp`](@ref).
 """
 function validate(code::StabilizerCode)
     s, l = stabilizers(code), logicals(code)
-    @assert all(bsp(s, transpose(s)) .== 0) "Stabilizers do not mutually commute."
-    @assert all(bsp(s, transpose(l)) .== 0) "Stabilizers do not commute with logicals."
+    all(bsp(s, transpose(s)) .== 0) || throw(QecsimError(
+        "stabilizers do not mutually commute"))
+    all(bsp(s, transpose(l)) .== 0) || throw(QecsimError(
+        "stabilizers do not commute with logicals"))
     # twisted identity with same size as logicals
     nlogicals = size(l, 1)
     twistedI = circshift(Matrix(I, nlogicals, nlogicals), nlogicals / 2)
-    @assert bsp(l, transpose(l)) == twistedI "Logicals do not mutually twist commute."
+    (bsp(l, transpose(l)) == twistedI) || throw(QecsimError(
+        "logicals do not mutually twist commute"))
+    return
 end
 
 end

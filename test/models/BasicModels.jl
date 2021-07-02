@@ -1,6 +1,6 @@
 using Test
-using Qecsim.Model
 using Qecsim.BasicModels
+using Qecsim.Model
 using Qecsim.PauliTools:to_bsf
 
 
