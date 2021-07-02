@@ -25,10 +25,11 @@ using Qecsim.PauliTools
     @test bsp(BitVector([1, 1, 1, 0, 0, 0])', BitVector([1, 1, 1, 1, 1, 1])) == 1
 
     stabilizers = BitMatrix(  # 5-qubit stabilizers
-        [1 0 0 1 0 0 1 1 0 0    # XZZXI
-         0 1 0 0 1 0 0 1 1 0    # IXZZX
-         1 0 1 0 0 0 0 0 1 1    # XIXZZ
-         0 1 0 1 0 1 0 0 0 1])  # ZXIXZ
+        [1 0 0 1 0 0 1 1 0 0   # XZZXI
+         0 1 0 0 1 0 0 1 1 0   # IXZZX
+         1 0 1 0 0 0 0 0 1 1   # XIXZZ
+         0 1 0 1 0 1 0 0 0 1]  # ZXIXZ
+    )
     error = BitVector([0, 0, 1, 1, 0, 0, 1, 0, 1, 0])  # IZXYI
     commutation = [0, 1, 1, 0]
     @test bsp(stabilizers, error) == commutation
@@ -54,11 +55,13 @@ end
     # Multiple bsfs
     @test to_pauli(BitMatrix(
         [1 0 0 0 1 0 0 1 0 1
-         0 1 0 1 0 0 0 1 1 0])) == ["XIZIY", "IXZYI"]
+         0 1 0 1 0 0 0 1 1 0])
+    ) == ["XIZIY", "IXZYI"]
     @test to_pauli(BitMatrix(
         [1 1 1 1 1 0 0 0 0 0
          0 0 0 0 0 1 1 1 1 1
-         1 1 1 1 1 1 1 1 1 1])) == ["XXXXX", "ZZZZZ", "YYYYY"]
+         1 1 1 1 1 1 1 1 1 1])
+    ) == ["XXXXX", "ZZZZZ", "YYYYY"]
     end
 
 @testset "to_bsf" begin
@@ -71,11 +74,13 @@ end
     # Multiple Paulis
     @test to_bsf(["XIZIY", "IXZYI"]) == BitMatrix(
         [1 0 0 0 1 0 0 1 0 1
-         0 1 0 1 0 0 0 1 1 0])
+         0 1 0 1 0 0 0 1 1 0]
+    )
     @test to_bsf(["XXXXX", "ZZZZZ", "YYYYY"]) == BitMatrix(
         [1 1 1 1 1 0 0 0 0 0
          0 0 0 0 0 1 1 1 1 1
-         1 1 1 1 1 1 1 1 1 1])
+         1 1 1 1 1 1 1 1 1 1]
+    )
     # ArgumentError: fail-fast if eltype is not string
     @test_throws ArgumentError to_bsf(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1]))
 end

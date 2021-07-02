@@ -16,10 +16,14 @@ CurrentModule = Qecsim.Model
 ```@docs
 Model
 ```
+### Model.AbstractModel
+```@docs
+Model.AbstractModel
+Model.label
+```
 ### Model.StabilizerCode
 ```@docs
 Model.StabilizerCode
-Model.label
 Model.logical_xs
 Model.logical_zs
 Model.logicals
@@ -28,6 +32,10 @@ Model.stabilizers
 Model.validate
 ```
 ### Model.ErrorModel
+```@docs
+Model.ErrorModel
+Model.generate
+```
 
 ## PauliTools
 ```@meta

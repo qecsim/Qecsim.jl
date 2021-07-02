@@ -10,10 +10,33 @@ using Qecsim.PauliTools:bsp
 export StabilizerCode
 export stabilizers, logical_xs, logical_zs, logicals, nkd, label, validate
 
+# AbstractModel
+
 """
+Abstract supertype for models.
+"""
+abstract type AbstractModel end
+
+"""
+    label(code::AbstractModel) -> String
+
+Return a label suitable for use in plots and for grouping results.
+
+!!! note "Abstract method"
+
+    This method should be implemented for concrete subtypes.
+"""
+function label end
+
+
+# StabilizerCode
+
+"""
+    StabilizerCode <: AbstractModel
+
 Abstract supertype for stabilizer codes.
 """
-abstract type StabilizerCode end
+abstract type StabilizerCode <: AbstractModel end
 
 """
     stabilizers(code::StabilizerCode) -> BitMatrix
@@ -64,11 +87,11 @@ Each row is an operator. X operators are stacked above Z operators in the order 
 [`logical_xs`](@ref) and [`logical_zs`](@ref).
 """
 function logicals(code::StabilizerCode)
-    vcat(logical_xs(code), logical_zs(code))
+    return vcat(logical_xs(code), logical_zs(code))
 end
 
 """
-    nkd(code::StabilizerCode) -> Tuple{Int, Int, Union{Int,Nothing}}
+    nkd(code::StabilizerCode) -> Tuple{Int, Int, Union{Int, Nothing}}
 
 Return a descriptor in the format `(n, k, d)`, where `n` is the number of physical qubits,
 `k` is the number of logical qubits, and `d` is the distance of the code (or `nothing` if
@@ -79,17 +102,6 @@ unknown).
     This method should be implemented for concrete subtypes.
 """
 function nkd end
-
-"""
-    label(code::StabilizerCode) -> String
-
-Return a label suitable for use in plots and for grouping results.
-
-!!! note "Abstract method"
-
-    This method should be implemented for concrete subtypes.
-"""
-function label end
 
 @doc raw"""
     validate(code::StabilizerCode)
@@ -116,7 +128,30 @@ function validate(code::StabilizerCode)
     twistedI = circshift(Matrix(I, nlogicals, nlogicals), nlogicals / 2)
     (bsp(l, transpose(l)) == twistedI) || throw(QecsimError(
         "logicals do not mutually twist commute"))
-    return
+    return nothing
 end
+
+
+# ErrorModel
+
+"""
+    ErrorModel <: AbstractModel
+
+Abstract supertype for error models.
+"""
+abstract type ErrorModel <: AbstractModel end
+
+"""
+    generate(error_model::ErrorModel, code::StabilizerCode, probability::Float64,
+             [rng::AbstractRNG=GLOBAL_RNG]) -> BitVector
+
+Generate a new error in binary symplectic form according to the `error_model` and `code`,
+where `probability` is typically the probability of an error on a single qubit.
+
+!!! note "Abstract method"
+
+    This method should be implemented for concrete subtypes.
+"""
+function generate end
 
 end

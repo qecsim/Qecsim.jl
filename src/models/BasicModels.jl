@@ -23,8 +23,8 @@ struct BasicCode <: StabilizerCode
     label::String
 end
 """
-    BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs; nkd=nothing,
-        label=nothing)
+    BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs;
+              nkd=nothing, label=nothing)
 
 Construct a basic code from string representations of stabilizers and logical operators.
 
@@ -55,8 +55,8 @@ function BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs;
         length(pauli_logical_xs),
         nothing)
     label = !isnothing(label) ? label : "Basic [$(nkd[1]),$(nkd[2]),$(nkd[3])]"
-    BasicCode(to_bsf(pauli_stabilizers), to_bsf(pauli_logical_xs),
-        to_bsf(pauli_logical_zs), nkd, label)
+    return BasicCode(to_bsf(pauli_stabilizers), to_bsf(pauli_logical_xs),
+                     to_bsf(pauli_logical_zs), nkd, label)
 end
 Model.stabilizers(code::BasicCode) = code.stablizers
 Model.logical_xs(code::BasicCode) = code.logical_xs
@@ -70,8 +70,8 @@ Model.label(code::BasicCode) = code.label
 Construct 5-qubit [5,1,3] code as a [`BasicCode`](@ref).
 """
 function FiveQubitCode()
-    BasicCode(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"],
-        ["XXXXX"], ["ZZZZZ"]; nkd=(5, 1, 3), label="5-qubit")
+    return BasicCode(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"], ["XXXXX"], ["ZZZZZ"];
+                     nkd=(5, 1, 3), label="5-qubit")
 end
 
 """
@@ -80,8 +80,9 @@ end
 Construct Steane [7,1,3] code as a [`BasicCode`](@ref).
 """
 function SteaneCode()
-    BasicCode(["IIIXXXX", "IXXIIXX", "XIXIXIX", "IIIZZZZ", "IZZIIZZ", "ZIZIZIZ"],
-        ["XXXXXXX"], ["ZZZZZZZ"]; nkd=(7, 1, 3), label="Steane")
+    return BasicCode(["IIIXXXX", "IXXIIXX", "XIXIXIX", "IIIZZZZ", "IZZIIZZ", "ZIZIZIZ"],
+                     ["XXXXXXX"], ["ZZZZZZZ"];
+                     nkd=(7, 1, 3), label="Steane")
 end
 
 end
