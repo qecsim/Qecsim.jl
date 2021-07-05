@@ -3,10 +3,7 @@
 ## Qecsim
 ```@docs
 Qecsim
-```
-```@autodocs
-Modules = [Qecsim]
-Order   = [:constant, :type, :function, :macro]
+Qecsim.QecsimError
 ```
 
 ## Model

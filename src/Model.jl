@@ -14,8 +14,7 @@ export StabilizerCode
 export stabilizers, logical_xs, logical_zs, logicals, nkd, validate
 
 export ErrorModel
-export generate
-export probability_distribution
+export generate, probability_distribution
 
 # AbstractModel
 
