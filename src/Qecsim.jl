@@ -16,5 +16,6 @@ include("Model.jl")
 
 # include implementation sub-modules (not reexported)
 include("models/BasicModels.jl")
+include("models/GenericModels.jl")
 
 end

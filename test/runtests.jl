@@ -5,4 +5,7 @@ using SafeTestsets
     @safetestset "PauliTools.jl" begin include("PauliTools.jl") end
     @safetestset "Model.jl" begin include("Model.jl") end
     @safetestset "models/BasicModels.jl" begin include("models/BasicModels.jl") end
+    @safetestset "models/GenericModels/simpleerrormodel.jl" begin
+        include("models/generic/simpleerrormodel.jl")
+    end
 end

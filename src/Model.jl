@@ -7,8 +7,15 @@ using LinearAlgebra:I
 using Qecsim:QecsimError
 using Qecsim.PauliTools:bsp
 
+export AbstractModel
+export label
+
 export StabilizerCode
-export stabilizers, logical_xs, logical_zs, logicals, nkd, label, validate
+export stabilizers, logical_xs, logical_zs, logicals, nkd, validate
+
+export ErrorModel
+export generate
+export probability_distribution
 
 # AbstractModel
 
@@ -24,7 +31,7 @@ Return a label suitable for use in plots and for grouping results.
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes.
+    This method should be implemented for concrete subtypes of [`AbstractModel`](@ref).
 """
 function label end
 
@@ -48,7 +55,7 @@ simplify decoding.
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes.
+    This method should be implemented for concrete subtypes of [`StabilizerCode`](@ref).
 """
 function stabilizers end
 
@@ -61,7 +68,7 @@ Each row is an operator. The order should match that of [`logical_zs`](@ref).
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes.
+    This method should be implemented for concrete subtypes of [`StabilizerCode`](@ref).
 """
 function logical_xs end
 
@@ -74,7 +81,7 @@ Each row is an operator. The order should match that of [`logical_xs`](@ref).
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes.
+    This method should be implemented for concrete subtypes of [`StabilizerCode`](@ref).
 """
 function logical_zs end
 
@@ -99,7 +106,7 @@ unknown).
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes.
+    This method should be implemented for concrete subtypes of [`StabilizerCode`](@ref).
 """
 function nkd end
 
@@ -150,12 +157,12 @@ where `p` is typically the probability of an error on a single qubit.
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes.
+    This method should be implemented for concrete subtypes of [`ErrorModel`](@ref).
 """
 function generate end
 
 """
-    probability_distribution(error_model::ErrorModel, p::Float64) -> NTuple{4, Float64}
+    probability_distribution(error_model::ErrorModel, p::Float64) -> NTuple{4, Real}
 
 Return the single-qubit probability distribution amongst Pauli I, X, Y and Z, where `p` is
 the overall probability of an error on a single qubit.
@@ -163,8 +170,8 @@ the overall probability of an error on a single qubit.
 !!! note "Abstract method [optional]"
 
     This method is **not** invoked by any core modules. Since it is often useful for
-    decoders, it is provided as a template and concrete subtypes are encouraged to implement
-    it when appropriate, particularly for IID error models.
+    decoders, it is provided as a template and concrete subtypes of [`ErrorModel`](@ref) are
+    encouraged to implement it when appropriate, particularly for IID error models.
 """
 function probability_distribution end
 

@@ -9,3 +9,9 @@ Modules = [BasicModels]
 ```
 
 ## GenericModels
+```@meta
+CurrentModule = Qecsim.GenericModels
+```
+```@autodocs
+Modules = [GenericModels]
+```
