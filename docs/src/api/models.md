@@ -19,4 +19,8 @@ CurrentModule = Qecsim.GenericModels
 GenericModels
 GenericModels.SimpleErrorModel
 Model.generate(::SimpleErrorModel, ::StabilizerCode, ::Float64, ::AbstractRNG)
+GenericModels.BitFlipErrorModel
+GenericModels.BitPhaseFlipErrorModel
+GenericModels.DepolarizingErrorModel
+GenericModels.PhaseFlipErrorModel
 ```

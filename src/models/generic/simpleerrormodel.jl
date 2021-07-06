@@ -28,36 +28,46 @@ function Model.generate(error_model::SimpleErrorModel, code::StabilizerCode, p::
     return to_bsf(error_pauli)
 end
 
+@doc raw"""
+    BitFlipErrorModel <: SimpleErrorModel
+
+IID error model with probability vector: ``(p_I, p_X, p_Y p_Z) = (1-p, p, 0, 0)``,
+where ``p`` is the probability of an error on a single-qubit.
+"""
+struct BitFlipErrorModel <: SimpleErrorModel end
+Model.label(::BitFlipErrorModel) = "Bit-flip"
+Model.probability_distribution(::BitFlipErrorModel, p::Float64) = (1-p, p, 0, 0)
+
+@doc raw"""
+    BitPhaseFlipErrorModel <: SimpleErrorModel
+
+IID error model with probability vector: ``(p_I, p_X, p_Y p_Z) = (1-p, 0, p, 0)``,
+where ``p`` is the probability of an error on a single-qubit.
+"""
+struct BitPhaseFlipErrorModel <: SimpleErrorModel end
+Model.label(::BitPhaseFlipErrorModel) = "Bit-phase-flip"
+Model.probability_distribution(::BitPhaseFlipErrorModel, p::Float64) = (1-p, 0, p, 0)
+
+@doc raw"""
+    DepolarizingErrorModel <: SimpleErrorModel
+
+IID error model with probability vector: ``(p_I, p_X, p_Y p_Z) = (1-p, p/3, p/3, p/3)``,
+where ``p`` is the probability of an error on a single-qubit.
+"""
 struct DepolarizingErrorModel <: SimpleErrorModel end
-function Model.label(::DepolarizingErrorModel)
-    return "Depolarizing"
-end
+Model.label(::DepolarizingErrorModel) = "Depolarizing"
 function Model.probability_distribution(::DepolarizingErrorModel, p::Float64)
     px = py = pz = p / 3
     pi = 1 - sum((px, py, pz))
     return (pi, px, py, pz)
 end
 
-struct BitFlipErrorModel <: SimpleErrorModel end
-function Model.label(::BitFlipErrorModel)
-    return "Bit-flip"
-end
-function Model.probability_distribution(::BitFlipErrorModel, p::Float64)
-    return (1-p, p, 0, 0)  # (pi, px, py, pz)
-end
+@doc raw"""
+    PhaseFlipErrorModel <: SimpleErrorModel
 
+IID error model with probability vector: ``(p_I, p_X, p_Y p_Z) = (1-p, 0, 0, p)``,
+where ``p`` is the probability of an error on a single-qubit.
+"""
 struct PhaseFlipErrorModel <: SimpleErrorModel end
-function Model.label(::PhaseFlipErrorModel)
-    return "Phase-flip"
-end
-function Model.probability_distribution(::PhaseFlipErrorModel, p::Float64)
-    return (1-p, 0, 0, p)  # (pi, px, py, pz)
-end
-
-struct BitPhaseFlipErrorModel <: SimpleErrorModel end
-function Model.label(::BitPhaseFlipErrorModel)
-    return "Bit-phase-flip"
-end
-function Model.probability_distribution(::BitPhaseFlipErrorModel, p::Float64)
-    return (1-p, 0, p, 0)  # (pi, px, py, pz)
-end
+Model.label(::PhaseFlipErrorModel) = "Phase-flip"
+Model.probability_distribution(::PhaseFlipErrorModel, p::Float64) = (1-p, 0, 0, p)
