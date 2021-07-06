@@ -1,8 +1,11 @@
 using SafeTestsets
 
 @safetestset "Qecsim.jl" begin
-    @safetestset "poc.jl" begin include("poc.jl") end
+    @safetestset "error.jl" begin include("error.jl") end
     @safetestset "PauliTools.jl" begin include("PauliTools.jl") end
     @safetestset "Model.jl" begin include("Model.jl") end
     @safetestset "models/BasicModels.jl" begin include("models/BasicModels.jl") end
+    @safetestset "models/GenericModels/simpleerrormodel.jl" begin
+        include("models/generic/simpleerrormodel.jl")
+    end
 end

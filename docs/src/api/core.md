@@ -1,12 +1,9 @@
-# API
+# Core
 
 ## Qecsim
 ```@docs
 Qecsim
-```
-```@autodocs
-Modules = [Qecsim]
-Order   = [:constant, :type, :function, :macro]
+Qecsim.QecsimError
 ```
 
 ## Model
@@ -16,10 +13,14 @@ CurrentModule = Qecsim.Model
 ```@docs
 Model
 ```
+### Model.AbstractModel
+```@docs
+Model.AbstractModel
+Model.label
+```
 ### Model.StabilizerCode
 ```@docs
 Model.StabilizerCode
-Model.label
 Model.logical_xs
 Model.logical_zs
 Model.logicals
@@ -28,6 +29,11 @@ Model.stabilizers
 Model.validate
 ```
 ### Model.ErrorModel
+```@docs
+Model.ErrorModel
+Model.generate
+Model.probability_distribution
+```
 
 ## PauliTools
 ```@meta
@@ -35,14 +41,4 @@ CurrentModule = Qecsim.PauliTools
 ```
 ```@autodocs
 Modules = [PauliTools]
-```
-
-## Models
-
-### BasicModels
-```@meta
-CurrentModule = Qecsim.BasicModels
-```
-```@autodocs
-Modules = [BasicModels]
 ```

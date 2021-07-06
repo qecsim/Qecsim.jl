@@ -1,7 +1,7 @@
 using Test
-using Qecsim.Model
 using Qecsim.BasicModels
-using Qecsim:PauliTools as PT
+using Qecsim.Model
+using Qecsim.PauliTools:to_bsf
 
 
 @testset "BasicCode" begin
@@ -14,12 +14,12 @@ using Qecsim:PauliTools as PT
         nkd=my_nkd, label=my_label)
     @test nkd(code) == my_nkd
     @test label(code) == my_label
-    @test stabilizers(code) == PT.pauli_to_bsf(pauli_stabilizers)
-    @test logical_xs(code) == PT.pauli_to_bsf(pauli_logical_xs)
-    @test logical_zs(code) == PT.pauli_to_bsf(pauli_logical_zs)
+    @test stabilizers(code) == to_bsf(pauli_stabilizers)
+    @test logical_xs(code) == to_bsf(pauli_logical_xs)
+    @test logical_zs(code) == to_bsf(pauli_logical_zs)
     # defaults
     code = BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs)
-    @test nkd(code) == (5, 1, nothing)
+    @test isequal(nkd(code), (5, 1, missing))  # isequal equates missing
     @test isa(label(code), String)
     # 5-qubit
     code = FiveQubitCode()

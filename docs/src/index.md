@@ -9,6 +9,7 @@ error correction using stabilizer codes.
 
 ## Contents
 
+### API
 ```@contents
-Pages = ["api.md", "api_index.md"]
+Pages = ["api/core.md", "api/models.md", "api/index.md"]
 ```
