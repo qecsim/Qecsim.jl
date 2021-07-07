@@ -10,7 +10,7 @@ to the first error that matches the syndrome.
 """
 struct NaiveDecoder <: Decoder end
 Model.label(::NaiveDecoder) = "Naive"
-function Model.decode(::NaiveDecoder, code::StabilizerCode, syndrome::AbstractVector{Int};
+function Model.decode(::NaiveDecoder, code::StabilizerCode, syndrome::AbstractVector{Bool};
                       kwargs...)
     recovery = _minimum_weight_recovery(code, syndrome)
     return DecodeResult(recovery)

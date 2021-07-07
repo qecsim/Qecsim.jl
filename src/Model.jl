@@ -188,15 +188,15 @@ Abstract supertype for decoders.
 abstract type Decoder <: AbstractModel end
 
 """
-    decode(decoder::Decoder, code::StabilizerCode, syndrome::AbstractVector{Int};
+    decode(decoder::Decoder, code::StabilizerCode, syndrome::AbstractVector{Bool};
            kwargs...) -> DecodeResult
 
 Resolve a recovery operation for the given `code` and `syndrome`, or evaluate the success of
 decoding, as encapsulated in the decode result.
 
 The syndrome has length equal to the number of code stabilizers, and element values of 0
-or 1 indicate whether the corresponding stabilizer commutes or does not commute with the
-error, respectively.
+or 1 (false or true) indicate whether the corresponding stabilizer does or does not commute
+with the error, respectively.
 
 Keyword parameters `kwargs` may be provided by the client with context values such as
 `error_model`, `error_probability` and `error`. Most implementations will ignore such

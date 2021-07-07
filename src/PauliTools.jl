@@ -6,7 +6,8 @@ module PauliTools
 export bsp, to_pauli, to_bsf
 
 @doc raw"""
-    bsp(A::Union{BitVector, BitMatrix}, B::Union{BitVector, BitMatrix})
+    bsp(A::AbstractVecOrMat{Bool}, B::AbstractVecOrMat{Bool})
+        -> Union{Bool, AbstractVecOrMat{Bool}}
 
 Return the binary symplectic product of `A` with `B`, given in binary symplectic form.
 
@@ -21,7 +22,7 @@ julia> a = BitVector([1, 0, 0, 0]);  # XI
 julia> b = BitVector([0, 0, 1, 0]);  # ZI
 
 julia> bsp(a', b)
-1
+true
 ```
 ```jldoctest
 julia> stabilizers = BitMatrix(  # 5-qubit stabilizers
@@ -33,7 +34,7 @@ julia> stabilizers = BitMatrix(  # 5-qubit stabilizers
 julia> error = BitVector([0, 0, 1, 1, 0, 0, 1, 0, 1, 0]);  # IZXYI
 
 julia> bsp(stabilizers, error)
-4-element Vector{Int64}:
+4-element BitVector:
  0
  1
  1
@@ -42,11 +43,11 @@ julia> bsp(stabilizers, error)
 """
 function bsp(a::AbstractVecOrMat{Bool}, b::AbstractVecOrMat{Bool})
     # circshift b by half its 1st dimension to emulate symplectic product
-    return mod.(a * circshift(b, size(b, 1)/2), 2)  # mod elements to base 2
+    return isodd.(a * circshift(b, size(b, 1)/2))  # mod elements to base 2
 end
 
 """
-    to_pauli(bsf::Union{BitVector, BitMatrix})
+    to_pauli(bsf::AbstractVecOrMat{Bool})
 
 Convert the binary symplectic form to Pauli string operator(s).
 
@@ -75,7 +76,7 @@ function to_pauli(bsfs::AbstractMatrix{Bool})
 end
 
 """
-    to_bsf(pauli::Union{String, Iterable of String})
+    to_bsf(pauli::Union{String, iterable of String})
 
 Convert the Pauli string operator(s) to binary symplectic form.
 
