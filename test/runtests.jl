@@ -1,6 +1,7 @@
+using Test
 using SafeTestsets
 
-@safetestset "Qecsim.jl" begin
+@testset verbose=true "Qecsim.jl" begin
     @safetestset "error.jl" begin include("error.jl") end
     @safetestset "PauliTools.jl" begin include("PauliTools.jl") end
     @safetestset "Model.jl" begin include("Model.jl") end
