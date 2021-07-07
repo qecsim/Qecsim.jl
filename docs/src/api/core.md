@@ -34,6 +34,12 @@ Model.ErrorModel
 Model.generate
 Model.probability_distribution
 ```
+### Model.Decoder
+```@docs
+Model.Decoder
+Model.DecodeResult
+Model.decode
+```
 
 ## PauliTools
 ```@meta

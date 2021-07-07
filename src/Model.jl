@@ -16,6 +16,10 @@ export stabilizers, logical_xs, logical_zs, logicals, nkd, validate
 export ErrorModel
 export generate, probability_distribution
 
+export Decoder
+export DecodeResult
+export decode
+
 # AbstractModel
 
 """
@@ -173,5 +177,33 @@ the overall probability of an error on a single qubit.
     encouraged to implement it when appropriate, particularly for IID error models.
 """
 function probability_distribution end
+
+
+# Decoder
+"""
+    Decoder <: AbstractModel
+
+Abstract supertype for decoders.
+"""
+abstract type Decoder <: AbstractModel end
+
+"""
+    decode(decoder::Decoder, code::StabilizerCode, syndrome::AbstractVector{Int};
+           kwargs...) -> DecodeResult
+
+TODO: doc
+
+!!! note "Abstract method"
+
+    This method should be implemented for concrete subtypes of [`Decoder`](@ref).
+"""
+function decode end
+
+"""
+TODO: doc
+"""
+struct DecodeResult
+    recovery::BitVector
+end
 
 end

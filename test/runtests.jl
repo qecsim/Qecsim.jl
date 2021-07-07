@@ -8,4 +8,7 @@ using SafeTestsets
     @safetestset "models/GenericModels/simpleerrormodel.jl" begin
         include("models/generic/simpleerrormodel.jl")
     end
+    @safetestset "models/GenericModels/naivedecoder.jl" begin
+        include("models/generic/naivedecoder.jl")
+    end
 end
