@@ -6,12 +6,23 @@ to the first error that matches the syndrome.
 
 !!! note
 
-    This decoder is slow for large number of qubits and high weight errors.
+    This decoder is slow for even moderate numbers of qubits. By default, it is restricted
+    to codes with a maximum of 10 qubits.
 """
-struct NaiveDecoder <: Decoder end
+struct NaiveDecoder <: Decoder
+    max_qubits::Int
+    NaiveDecoder(max_qubits=10) = new(max_qubits)
+end
 Model.label(::NaiveDecoder) = "Naive"
-function Model.decode(::NaiveDecoder, code::StabilizerCode, syndrome::AbstractVector{Bool};
-                      kwargs...)
+function Model.decode(
+    decoder::NaiveDecoder,
+    code::StabilizerCode,
+    syndrome::AbstractVector{Bool};
+    kwargs...
+)
+    if 0 <= decoder.max_qubits < nkd(code)[1]
+        throw(ArgumentError("NaiveDecoder restricted to $(decoder.max_qubits) qubits"))
+    end
     recovery = _minimum_weight_recovery(code, syndrome)
     return DecodeResult(recovery)
 end
