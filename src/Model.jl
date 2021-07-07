@@ -120,9 +120,9 @@ Perform sanity checks.
 
 If any of the following fail then a [`QecsimError`](@ref) is thrown:
 
-  * ``S \odot S^T = 0``
-  * ``S \odot L^T = 0``
-  * ``L \odot L^T = \Lambda``
+* ``S \odot S^T = 0``
+* ``S \odot L^T = 0``
+* ``L \odot L^T = \Lambda``
 
 where ``S`` and ``L`` are the code [`stabilizers`](@ref) and [`logicals`](@ref),
 respectively, and ``\odot`` and ``\Lambda`` are defined in [`bsp`](@ref).
@@ -191,7 +191,17 @@ abstract type Decoder <: AbstractModel end
     decode(decoder::Decoder, code::StabilizerCode, syndrome::AbstractVector{Int};
            kwargs...) -> DecodeResult
 
-TODO: doc
+Resolve a recovery operation for the given `code` and `syndrome`, or evaluate the success of
+decoding, as encapsulated in the decode result.
+
+The syndrome has length equal to the number of code stabilizers, and element values of 0
+or 1 indicate whether the corresponding stabilizer commutes or does not commute with the
+error, respectively.
+
+Keyword parameters `kwargs` may be provided by the client with context values such as
+`error_model`, `error_probability` and `error`. Most implementations will ignore such
+parameters; however, if they are used, implementations should declare them explicitly and
+treat them as optional.
 
 !!! note "Abstract method"
 
@@ -200,7 +210,10 @@ TODO: doc
 function decode end
 
 """
-TODO: doc
+Decoding result as returned by [`decode`](@ref).
+
+Currently it consists of the recovery operation but will be extended to include success
+flags and more.
 """
 struct DecodeResult
     recovery::BitVector
