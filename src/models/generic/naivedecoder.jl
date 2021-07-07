@@ -1,8 +1,10 @@
 """
     NaiveDecoder <: Decoder
 
-Naive decoder that iterates through all possible errors, in ascending weight, and resolves
-to the first error that matches the syndrome.
+    NaiveDecoder([max_qubits=10])
+
+Construct a naive decoder that iterates through all possible errors, in ascending weight,
+and resolves to the first error that matches the syndrome.
 
 !!! note
 

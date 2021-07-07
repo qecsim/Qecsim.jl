@@ -209,10 +209,13 @@ treat them as optional.
 function decode end
 
 """
-Decoding result as returned by [`decode`](@ref).
+    DecodeResult(recovery::AbstractVector{Bool})
 
-Currently it consists of the recovery operation but will be extended to include success
-flags and more.
+Construct a decoding result including the recovery operation.
+
+!!! warning
+
+    In the future, this type will be extended to include success flags and more.
 """
 struct DecodeResult
     recovery::BitVector

@@ -10,11 +10,6 @@ using Qecsim.PauliTools:to_bsf
 
 export BasicCode, FiveQubitCode, SteaneCode
 
-"""
-    BasicCode <: StabilizerCode
-
-Basic code defined by its stabilizers and logical operators.
-"""
 struct BasicCode <: StabilizerCode
     stablizers::BitMatrix
     logical_xs::BitMatrix
@@ -23,6 +18,8 @@ struct BasicCode <: StabilizerCode
     label::String
 end
 """
+    BasicCode <: StabilizerCode
+
     BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs;
               nkd=nothing, label=nothing)
 
@@ -30,7 +27,7 @@ Construct a basic code from string representations of stabilizers and logical op
 
 Paulis are expressed as strings of capitalized I, X, Y, Z characters, with one character per
 physical qubit. Logical X and Z operators are in matching order, with one of each for each
-logical qubit. Optional `nkd` defaults to `n` and `k` evaluated and `d` nothing. Optional
+logical qubit. Optional `nkd` defaults to `n` and `k` evaluated and `d` missing. Optional
 `label` defaults to "Basic [n,k,d]".
 
 # Examples
@@ -66,7 +63,7 @@ Model.nkd(code::BasicCode) = code.nkd
 Model.label(code::BasicCode) = code.label
 
 """
-    FiveQubitCode()
+    FiveQubitCode() -> BasicCode
 
 Construct 5-qubit [5,1,3] code as a [`BasicCode`](@ref).
 """
@@ -76,7 +73,7 @@ function FiveQubitCode()
 end
 
 """
-    SteaneCode()
+    SteaneCode() -> BasicCode
 
 Construct Steane [7,1,3] code as a [`BasicCode`](@ref).
 """

@@ -1,7 +1,9 @@
 """
-    QecsimError(msg::String)
+    QecsimError <: Exception
 
-Indicates an internal (core or models) error.
+    QecsimError(msg)
+
+Construct an exception indicating an internal (core or models) error.
 """
 struct QecsimError <: Exception
     msg::String
