@@ -45,6 +45,10 @@ Model.decode
 ```@meta
 CurrentModule = Qecsim.PauliTools
 ```
-```@autodocs
-Modules = [PauliTools]
+```@docs
+PauliTools
+PauliTools.bsp
+PauliTools.to_bsf
+PauliTools.to_pauli
+PauliTools.weight
 ```

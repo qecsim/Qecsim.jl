@@ -45,6 +45,25 @@ using Qecsim.PauliTools
     @test bsp(errors', stabilizers')::BitMatrix == commutation'
 end
 
+@testset "to_bsf" begin
+    # Single Paulis
+    @test to_bsf("XIZIY") == BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1])
+    @test to_bsf("IIIII") == BitVector([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    @test to_bsf("XXXXX") == BitVector([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
+    @test to_bsf("ZZZZZ") == BitVector([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
+    @test to_bsf("YYYYY") == BitVector([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+    # Multiple Paulis
+    @test to_bsf(["XIZIY", "IXZYI"]) == BitMatrix(
+        [1 0 0 0 1 0 0 1 0 1
+         0 1 0 1 0 0 0 1 1 0]
+    )
+    @test to_bsf(["XXXXX", "ZZZZZ", "YYYYY"]) == BitMatrix(
+        [1 1 1 1 1 0 0 0 0 0
+         0 0 0 0 0 1 1 1 1 1
+         1 1 1 1 1 1 1 1 1 1]
+    )
+end
+
 @testset "to_pauli" begin
     # Single bsf
     @test to_pauli(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1])) == "XIZIY"
@@ -64,23 +83,16 @@ end
     ) == ["XXXXX", "ZZZZZ", "YYYYY"]
     end
 
-@testset "to_bsf" begin
-    # Single Paulis
-    @test to_bsf("XIZIY") == BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1])
-    @test to_bsf("IIIII") == BitVector([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    @test to_bsf("XXXXX") == BitVector([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
-    @test to_bsf("ZZZZZ") == BitVector([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
-    @test to_bsf("YYYYY") == BitVector([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-    # Multiple Paulis
-    @test to_bsf(["XIZIY", "IXZYI"]) == BitMatrix(
-        [1 0 0 0 1 0 0 1 0 1
-         0 1 0 1 0 0 0 1 1 0]
+@testset "weight" begin
+    for (pauli, wt) in (
+        ("IIIII", 0),
+        ("XIZIY", 3),
+        ("XXXXX", 5),
+        ("YYYYY", 5),
+        ("ZZZZZ", 5),
+        (["XIZIY", "XXXXX"], 8),
     )
-    @test to_bsf(["XXXXX", "ZZZZZ", "YYYYY"]) == BitMatrix(
-        [1 1 1 1 1 0 0 0 0 0
-         0 0 0 0 0 1 1 1 1 1
-         1 1 1 1 1 1 1 1 1 1]
-    )
-    # ArgumentError: fail-fast if eltype is not string
-    @test_throws ArgumentError to_bsf(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1]))
+        @test weight(pauli) == wt
+        @test weight(to_bsf(pauli)) == wt
+    end
 end

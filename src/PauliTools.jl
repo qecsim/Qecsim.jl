@@ -3,7 +3,7 @@ Tools for Pauli strings and binary symplectic vectors / matrices.
 """
 module PauliTools
 
-export bsp, to_pauli, to_bsf
+export bsp, to_bsf, to_pauli, weight
 
 @doc raw"""
     bsp(A::AbstractVecOrMat{Bool}, B::AbstractVecOrMat{Bool})
@@ -47,6 +47,46 @@ function bsp(a::AbstractVecOrMat{Bool}, b::AbstractVecOrMat{Bool})
 end
 
 """
+    to_bsf(pauli::Union{AbstractString, AbstractVector{<:AbstractString}})
+
+Convert the Pauli string operator(s) to binary symplectic form.
+
+A single Pauli string is converted to a vector. A vector of Pauli strings is converted to a
+matrix where each row corresponds to a Pauli.
+
+# Examples
+```jldoctest
+julia> to_bsf("XIZIY")
+10-element BitVector:
+ 1
+ 0
+ 0
+ 0
+ 1
+ 0
+ 0
+ 1
+ 0
+ 1
+```
+```jldoctest
+julia> to_bsf(["XIZIY", "IXZYI"])
+2×10 BitMatrix:
+ 1  0  0  0  1  0  0  1  0  1
+ 0  1  0  1  0  0  0  1  1  0
+```
+"""
+function to_bsf(pauli::AbstractString)
+    p = collect(pauli)
+    ys = p .== 'Y'
+    return vcat((p .== 'X') .| ys, (p .== 'Z') .| ys)
+end
+function to_bsf(paulis::AbstractVector{<:AbstractString})
+    # for each pauli string, convert to bsf vector, transpose; then concatenate as rows
+    return vcat((transpose(to_bsf(p)) for p in paulis)...)
+end
+
+"""
     to_pauli(bsf::AbstractVecOrMat{Bool})
 
 Convert the binary symplectic form to Pauli string operator(s).
@@ -76,48 +116,49 @@ function to_pauli(bsfs::AbstractMatrix{Bool})
 end
 
 """
-    to_bsf(pauli::Union{String, iterable of String})
+    weight(bsf::AbstractVecOrMat{Bool})
 
-Convert the Pauli string operator(s) to binary symplectic form.
-
-A single Pauli string is converted to a vector. A collection of Pauli strings is converted
-to a matrix where each row corresponds to a Pauli.
+Return the weight of the binary symplectic form.
 
 # Examples
 ```jldoctest
-julia> to_bsf("XIZIY")
-10-element BitVector:
- 1
- 0
- 0
- 0
- 1
- 0
- 0
- 1
- 0
- 1
+julia> weight(BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1]))
+3
 ```
 ```jldoctest
-julia> to_bsf(["XIZIY", "IXZYI"])
-2×10 BitMatrix:
- 1  0  0  0  1  0  0  1  0  1
- 0  1  0  1  0  0  0  1  1  0
+julia> weight(BitMatrix([1 0 0 0 1 0 0 1 0 1; 1 1 1 1 1 0 0 0 0 0]))
+8
 ```
 """
-function to_bsf(pauli::AbstractString)
-    p = collect(pauli)
-    ys = p .== 'Y'
-    return vcat((p .== 'X') .| ys, (p .== 'Z') .| ys)
+function weight(bsf::AbstractVector{Bool})
+    l = length(bsf)  # bsf = (1 0 0 | 1 1 0)
+    return count(>(0), bsf[1:l÷2] + bsf[l÷2+1:end])  # count(>(0), (2 1 0))
 end
-function to_bsf(paulis)
-    # Note: I cannot see good way to restrict this method based on eltype of AbstractString
-    # so an 'isa' type test is included to fail-fast and avoid infinite recursion.
+function weight(bsfs::AbstractMatrix{Bool})
+    l = size(bsfs, 2)  # bsf = (1 0 0 | 1 1 0; 1 1 1 | 0 1 0)
+    return count(>(0), bsfs[:,1:l÷2] + bsfs[:,l÷2+1:end])  # count(>(0), (2 1 0; 1 2 1))
+end
 
-    # for each pauli, if string convert to bsf vector, transpose and concatenate as rows
-    return vcat((isa(p, AbstractString) ? transpose(to_bsf(p))
-                : throw(ArgumentError("invalid Pauli type: $(typeof(p))"))
-                for p in paulis)...)
+"""
+    weight(pauli::Union{AbstractString, AbstractVector{<:AbstractString}})
+
+Return the weight of the Pauli string operator(s).
+
+# Examples
+```jldoctest
+julia> weight("XIZIY")
+3
+```
+```jldoctest
+julia> weight(["XIZIY", "XXXXX"])
+8
+```
+"""
+function weight(pauli::AbstractString)
+    return count(!=('I'), pauli)  # count(!=('I'), "IXYIZ")
+end
+function weight(paulis::AbstractVector{<:AbstractString})
+    return sum(weight, paulis)
 end
 
 end
