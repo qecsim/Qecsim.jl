@@ -6,6 +6,14 @@ Qecsim
 Qecsim.QecsimError
 ```
 
+## App
+```@meta
+CurrentModule = Qecsim.App
+```
+```@docs
+App.qec_run_once
+```
+
 ## Model
 ```@meta
 CurrentModule = Qecsim.Model

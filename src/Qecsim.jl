@@ -11,8 +11,10 @@ include("error.jl")
 # include core sub-modules (and reexport)
 include("PauliTools.jl")
 include("Model.jl")
+include("App.jl")
 @reexport using Qecsim.PauliTools
 @reexport using Qecsim.Model
+@reexport using Qecsim.App
 
 # include implementation sub-modules (not reexported)
 include("models/BasicModels.jl")

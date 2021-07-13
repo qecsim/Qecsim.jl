@@ -12,4 +12,5 @@ using SafeTestsets
     @safetestset "models/GenericModels/naivedecoder.jl" begin
         include("models/generic/naivedecoder.jl")
     end
+    @safetestset "App.jl" begin include("App.jl") end
 end
