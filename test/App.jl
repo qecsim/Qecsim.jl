@@ -1,8 +1,26 @@
+import Qecsim.Model
+
 using Test
 using Qecsim.App
 using Qecsim.BasicModels: FiveQubitCode
 using Qecsim.GenericModels: DepolarizingErrorModel, NaiveDecoder
+using Qecsim.Model: ErrorModel, Decoder, DecodeResult
+using Qecsim.PauliTools: to_bsf
 using Random: MersenneTwister
+
+# test stub error model that generates a fixed given error
+struct _FixedErrorModel <: ErrorModel
+    error::BitVector
+end
+Model.label(::_FixedErrorModel) = "fixed"
+Model.generate(error_model::_FixedErrorModel, x...) = error_model.error
+
+# test stub decoder that decodes to a fixed given recovery
+struct _FixedDecoder <: Decoder
+    recovery::BitVector
+end
+Model.label(::_FixedDecoder) = "fixed"
+Model.decode(decoder::_FixedDecoder, x...; kwargs...) = DecodeResult(decoder.recovery)
 
 @testset "qec_run_once" begin
     # simple run
@@ -23,5 +41,10 @@ using Random: MersenneTwister
     data1 = qec_run_once(code, error_model, decoder, p, MersenneTwister(13))
     data2 = qec_run_once(code, error_model, decoder, p, MersenneTwister(13))
     @test data1 == data2
-    #TODO: test for @warn
+    # warn: RECOVERY DOES NOT RETURN TO CODESPACE
+    error_model = _FixedErrorModel(to_bsf("IIIII"))
+    decoder = _FixedDecoder(to_bsf("IIIIX"))
+    @test_logs (:warn, "RECOVERY DOES NOT RETURN TO CODESPACE") #=
+        =# data = qec_run_once(code, error_model, decoder, p)
+    @test !data[:success]
 end
