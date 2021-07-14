@@ -45,6 +45,17 @@ using Qecsim.PauliTools
     @test bsp(errors', stabilizers')::BitMatrix == commutation'
 end
 
+@testset "pack_unpack" begin
+    # specific test
+    bsf = to_bsf("XIZIY")  # 1000100101
+    packed_bsf = pack(bsf)
+    @test packed_bsf == ("225", 10)
+    @test unpack(packed_bsf) == bsf
+    # long (>128) bit-vector (to test BigInt handles long binary vectors)
+    bsf = BitVector(rand(0:1, 150))
+    @test unpack(pack(bsf)) == bsf
+end
+
 @testset "to_bsf" begin
     # Single Paulis
     @test to_bsf("XIZIY") == BitVector([1, 0, 0, 0, 1, 0, 0, 1, 0, 1])

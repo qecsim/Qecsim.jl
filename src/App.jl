@@ -1,7 +1,7 @@
 module App
 
 using Qecsim.Model
-using Qecsim.PauliTools: bsp, weight
+using Qecsim.PauliTools: bsp, pack, weight
 using Random: AbstractRNG, GLOBAL_RNG
 
 export qec_run_once
@@ -35,9 +35,9 @@ function qec_run_once(
     s_commutes = !any(s_commutations)
     l_commutes = !any(l_commutations)
     if !s_commutes
-        log_data = Dict(
-            :error => error,  #TODO: pack
-            :recovery => result.recovery,  #TODO: pack
+        log_data = Dict(  # pack to concise string format
+            :error => pack(error),
+            :recovery => pack(result.recovery),
         )
         @warn "RECOVERY DOES NOT RETURN TO CODESPACE" log_data...
     end

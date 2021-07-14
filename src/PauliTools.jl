@@ -3,11 +3,11 @@ Tools for Pauli strings and binary symplectic vectors / matrices.
 """
 module PauliTools
 
-export bsp, to_bsf, to_pauli, weight
+export bsp, pack, unpack, to_bsf, to_pauli, weight
 
 @doc raw"""
     bsp(A::AbstractVecOrMat{Bool}, B::AbstractVecOrMat{Bool})
-        -> Union{Bool, AbstractVecOrMat{Bool}}
+        -> Union{Bool, BitVector, BitMatrix}
 
 Return the binary symplectic product of `A` with `B`, given in binary symplectic form.
 
@@ -44,6 +44,56 @@ julia> bsp(stabilizers, error)
 function bsp(a::AbstractVecOrMat{Bool}, b::AbstractVecOrMat{Bool})
     # circshift b by half its 1st dimension to emulate symplectic product
     return isodd.(a * circshift(b, size(b, 1)/2))  # mod elements to base 2
+end
+
+"""
+    pack(bsf::AbstractVector{Bool}) -> Tuple{String, Int}
+
+Pack a binary vector into a concise representation, typically for log output. See also
+[`unpack`](@ref).
+
+# Examples
+```jldoctest
+julia> a = BitVector([1, 0, 1, 0, 1, 1]);  # XYZ
+
+julia> b = pack(a)  # (hex_value, length)
+("2b", 6)
+julia> unpack(b) == a
+true
+```
+"""
+function pack(bsf::AbstractVector{Bool})
+    bit_str = join(d ? '1' : '0' for d in bsf)  # convert to bit-string
+    val = parse(BigInt, bit_str; base=2)  # parse to val (BigInt to support long vectors)
+    return string(val, base=16), length(bsf)  # hex_str, len
+end
+
+"""
+    unpack(packed_bsf::Tuple{String, Int}) -> BitVector
+
+Unpack a binary vector from a concise representation, typically from log output. See also
+[`pack`](@ref).
+
+# Examples
+```jldoctest
+julia> a = ("2b", 6);  # (hex_value, length)
+
+julia> b = unpack(a)  # XYZ
+6-element BitVector:
+ 1
+ 0
+ 1
+ 0
+ 1
+ 1
+julia> pack(b) == a
+true
+```
+"""
+function unpack(packed_bsf::Tuple{String, Int})
+    hex_str, len = packed_bsf
+    val = parse(BigInt, hex_str; base=16)  # parse to val (BigInt to support long vectors)
+    return reverse!(BitVector(digits(val; base=2, pad=len)))  # binary-digits as BitVector
 end
 
 """
@@ -116,7 +166,7 @@ function to_pauli(bsfs::AbstractMatrix{Bool})
 end
 
 """
-    weight(bsf::AbstractVecOrMat{Bool})
+    weight(bsf::AbstractVecOrMat{Bool}) -> Int
 
 Return the weight of the binary symplectic form.
 
@@ -140,7 +190,7 @@ function weight(bsfs::AbstractMatrix{Bool})
 end
 
 """
-    weight(pauli::Union{AbstractString, AbstractVector{<:AbstractString}})
+    weight(pauli::Union{AbstractString, AbstractVector{<:AbstractString}}) -> Int
 
 Return the weight of the Pauli string operator(s).
 

@@ -56,7 +56,9 @@ CurrentModule = Qecsim.PauliTools
 ```@docs
 PauliTools
 PauliTools.bsp
+PauliTools.pack
 PauliTools.to_bsf
 PauliTools.to_pauli
+PauliTools.unpack
 PauliTools.weight
 ```
