@@ -3,8 +3,10 @@ Package for simulating quantum error correction using stabilizer codes.
 """
 module Qecsim
 
+# imports
 using Reexport
 
+# exports
 export QecsimError
 include("error.jl")
 
@@ -12,9 +14,9 @@ include("error.jl")
 include("PauliTools.jl")
 include("Model.jl")
 include("App.jl")
-@reexport using Qecsim.PauliTools
-@reexport using Qecsim.Model
-@reexport using Qecsim.App
+@reexport using .PauliTools
+@reexport using .Model
+@reexport using .App
 
 # include implementation sub-modules (not reexported)
 include("models/BasicModels.jl")

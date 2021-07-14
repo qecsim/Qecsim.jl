@@ -11,6 +11,7 @@ Qecsim.QecsimError
 CurrentModule = Qecsim.App
 ```
 ```@docs
+App
 App.qec_run_once
 ```
 

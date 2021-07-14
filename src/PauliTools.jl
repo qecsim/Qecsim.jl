@@ -3,6 +3,7 @@ Tools for Pauli strings and binary symplectic vectors / matrices.
 """
 module PauliTools
 
+# exports
 export bsp, pack, unpack, to_bsf, to_pauli, weight
 
 @doc raw"""

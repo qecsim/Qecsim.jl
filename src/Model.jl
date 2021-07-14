@@ -3,22 +3,26 @@ Abstract types and methods for codes, error models and decoders.
 """
 module Model
 
+# imports
+using ..Qecsim: QecsimError
+using ..PauliTools: bsp
 using LinearAlgebra: I
-using Qecsim: QecsimError
-using Qecsim.PauliTools: bsp
 
+# exports
+# - abstract model
 export AbstractModel
 export label
-
+# - stabilizer code
 export StabilizerCode
 export stabilizers, logical_xs, logical_zs, logicals, nkd, validate
-
+# - error model
 export ErrorModel
 export generate, probability_distribution
-
+# - decoder
 export Decoder
 export DecodeResult
 export decode
+
 
 # AbstractModel
 

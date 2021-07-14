@@ -3,11 +3,13 @@ Basic stabilizer codes
 """
 module BasicModels
 
-import Qecsim.Model
+# imports
+import ..Model
 
-using Qecsim.Model: StabilizerCode
-using Qecsim.PauliTools: to_bsf
+using ..Model: StabilizerCode
+using ..PauliTools: to_bsf
 
+# exports
 export BasicCode, FiveQubitCode, SteaneCode
 
 struct BasicCode <: StabilizerCode

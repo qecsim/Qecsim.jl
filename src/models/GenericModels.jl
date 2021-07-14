@@ -3,24 +3,24 @@ Generic error models and decoders compatible with any stabilizer codes.
 """
 module GenericModels
 
+# imports
+import ..Model
+
+using ..Model
+using ..PauliTools: bsp, to_bsf
+using Combinatorics: combinations
+using Random: AbstractRNG, GLOBAL_RNG
+using StatsBase: ProbabilityWeights, sample
+
 # exports
-#  error models
+# - error models
 export SimpleErrorModel
 export BitFlipErrorModel
 export BitPhaseFlipErrorModel
 export DepolarizingErrorModel
 export PhaseFlipErrorModel
-#  decoders
+# - decoders
 export NaiveDecoder
-
-# imports
-import Qecsim.Model
-# usings
-using Qecsim.Model
-using Qecsim.PauliTools: bsp, to_bsf
-using Combinatorics: combinations
-using Random: AbstractRNG, GLOBAL_RNG
-using StatsBase: ProbabilityWeights, sample
 
 # includes
 include("generic/simpleerrormodel.jl")

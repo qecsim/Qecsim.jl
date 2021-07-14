@@ -1,9 +1,14 @@
+"""
+Functions to run quantum error correction simulations and merge output data.
+"""
 module App
 
-using Qecsim.Model
-using Qecsim.PauliTools: bsp, pack, weight
+# imports
+using ..Model
+using ..PauliTools: bsp, pack, weight
 using Random: AbstractRNG, GLOBAL_RNG
 
+# exports
 export qec_run_once
 
 """

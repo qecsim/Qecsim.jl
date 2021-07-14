@@ -2,9 +2,9 @@ using Test
 
 using Qecsim.GenericModels
 using Qecsim.Model
-using Qecsim.BasicModels:FiveQubitCode
-using Qecsim.PauliTools:to_pauli
-using Random:MersenneTwister
+using Qecsim.BasicModels: FiveQubitCode
+using Qecsim.PauliTools: to_pauli
+using Random: MersenneTwister
 
 # utility test function
 function test_simpleerrormodel(
