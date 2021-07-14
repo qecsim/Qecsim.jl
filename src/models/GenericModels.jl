@@ -17,10 +17,10 @@ export NaiveDecoder
 import Qecsim.Model
 # usings
 using Qecsim.Model
-using Qecsim.PauliTools:bsp, to_bsf
-using Combinatorics:combinations
-using Random:AbstractRNG, GLOBAL_RNG
-using StatsBase:ProbabilityWeights, sample
+using Qecsim.PauliTools: bsp, to_bsf
+using Combinatorics: combinations
+using Random: AbstractRNG, GLOBAL_RNG
+using StatsBase: ProbabilityWeights, sample
 
 # includes
 include("generic/simpleerrormodel.jl")

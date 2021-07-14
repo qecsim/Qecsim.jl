@@ -1,8 +1,8 @@
 using Test
 using Qecsim.Model
-using Qecsim:QecsimError
-using Qecsim.BasicModels:BasicCode
-using Qecsim.PauliTools:to_bsf
+using Qecsim: QecsimError
+using Qecsim.BasicModels: BasicCode
+using Qecsim.PauliTools: to_bsf
 
 @testset "StabilizerCode" begin
     # 5-qubit code

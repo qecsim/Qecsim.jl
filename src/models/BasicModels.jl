@@ -5,8 +5,8 @@ module BasicModels
 
 import Qecsim.Model
 
-using Qecsim.Model:StabilizerCode
-using Qecsim.PauliTools:to_bsf
+using Qecsim.Model: StabilizerCode
+using Qecsim.PauliTools: to_bsf
 
 export BasicCode, FiveQubitCode, SteaneCode
 

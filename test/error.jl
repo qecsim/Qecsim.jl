@@ -1,5 +1,5 @@
 using Test
-using Qecsim:QecsimError
+using Qecsim: QecsimError
 
 # taken from https://github.com/JuliaLang/julia/blob/v1.6.1/test/errorshow.jl
 macro except_str(expr, err_type)
