@@ -6,6 +6,7 @@ using Qecsim.BasicModels: FiveQubitCode
 using Qecsim.GenericModels: DepolarizingErrorModel, NaiveDecoder
 using Qecsim.Model: ErrorModel, Decoder, DecodeResult
 using Qecsim.PauliTools: to_bsf
+using JSON
 using Random: MersenneTwister
 
 # test stub error model that generates a fixed given error
@@ -47,4 +48,13 @@ Model.decode(decoder::_FixedDecoder, x...; kwargs...) = DecodeResult(decoder.rec
     @test_logs (:warn, "RECOVERY DOES NOT RETURN TO CODESPACE") #=
         =# data = qec_run_once(code, error_model, decoder, p)
     @test !data[:success]
+end
+
+@testset "qec_run" begin
+    code = FiveQubitCode()
+    error_model = DepolarizingErrorModel()
+    decoder = NaiveDecoder()
+    p = 0.1
+    data = qec_run(code, error_model, decoder, p)
+    println("json=$(JSON.print(data, 4))")
 end
