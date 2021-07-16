@@ -57,4 +57,16 @@ end
     p = 0.25
     data = qec_run(code, error_model, decoder, p; max_runs=1000)
     println("json=$(JSON.print(data, 4))")
+    #TODO: consider in-place version of _null_add
+    #TODO: make qec_run_once return a struct e.g. RunResult
+    #TODO: test qec_run_once for type stability
+    #TODO: test qec_run for type stability
+    #TODO: qec_run tests
+    #TODO: qec_run docs
+    #TODO: implement DecodeResult handling with parameterized custom_values numeric vector
+    #      (see https://docs.julialang.org/en/v1/manual/performance-tips/#Type-declarations)
+    #TODO: qec_run/run_once: support custom_values, custom_totals
+    #TODO: qec_merge
+    #TODO: CLI/file versions of qec_run and qec_merge
+    #TODO: test all major methods for type stability
 end

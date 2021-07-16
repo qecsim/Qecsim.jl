@@ -80,6 +80,8 @@ function qec_run(
     n_run = n_success = 0
     error_weights = Int[]
     if !isnothing(max_runs) sizehint!(error_weights, max_runs) end
+    n_logical_commutations::Union{Nothing, Vector{Int}} = nothing  # promote to Int[]
+    custom_totals = nothing
 
     # do runs
     while ((isnothing(max_runs) || n_run < max_runs)
@@ -88,6 +90,17 @@ function qec_run(
         n_run += 1
         n_success += data[:success] ? 1 : 0
         push!(error_weights, data[:error_weight])
+        if n_run == 1  # initialize vector sums
+            n_logical_commutations = _null_copy(data[:logical_commutations])
+        else  # update vector sums
+            # NOTE: in-place is quicker!
+            # logical_commutations = data[:logical_commutations]
+            # for i in eachindex(n_logical_commutations)
+            #     n_logical_commutations[i] += logical_commutations[i]
+            # end
+            n_logical_commutations = _null_add(n_logical_commutations,
+                data[:logical_commutations])
+        end
     end
 
     # prepare data
@@ -102,13 +115,13 @@ function qec_run(
         :n_run => n_run,
         :n_success => n_success,
         :n_fail => n_run - n_success,
-        :n_logical_commutations => nothing,
-        :custom_totals => nothing,
+        :n_logical_commutations => n_logical_commutations,
+        :custom_totals => custom_totals,
         :error_weight_total => sum(error_weights),
         :error_weight_pvar => var(error_weights; corrected=false),
-        :logical_failure_rate => 0.0,
-        :physical_error_rate => 0.0,
-        :wall_time => 0.0,
+        :logical_failure_rate => 0.0,  # set below
+        :physical_error_rate => 0.0,  # set below
+        :wall_time => 0.0,  # set below
     )
     # set rate statistics
     _rate_statistics!(runs_data)
@@ -119,6 +132,17 @@ function qec_run(
     return runs_data
 end
 
+# return copy of vec_val (or nothing if null)
+function _null_copy(val)
+    isnothing(val) ? nothing : copy(val)
+end
+# return val1 + val2 (or nothing if both null; fails if one and only one is null)
+function _null_add(val1, val2)
+    if isnothing(val1) && isnothing(val2)
+        return nothing
+    end
+    return val1 + val2
+end
 # set :logical_failure_rate and :physical_error_rate as defined in qec_run
 function _rate_statistics!(runs_data)
     # extract data
@@ -130,6 +154,7 @@ function _rate_statistics!(runs_data)
     # add rate statistics
     runs_data[:logical_failure_rate] = n_fail / n_run
     runs_data[:physical_error_rate] = error_weight_total / nkd[1] / time_steps / n_run
+    return nothing
 end
 
 end
