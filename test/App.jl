@@ -18,10 +18,10 @@ Model.generate(error_model::_FixedErrorModel, x...) = error_model.error
 
 # test stub decoder that decodes to a fixed given recovery
 struct _FixedDecoder <: Decoder
-    recovery::BitVector
+    result::DecodeResult
 end
 Model.label(::_FixedDecoder) = "fixed"
-Model.decode(decoder::_FixedDecoder, x...; kwargs...) = DecodeResult(decoder.recovery)
+Model.decode(decoder::_FixedDecoder, x...; kwargs...) = decoder.result
 
 @testset "qec_run_once" begin
     # simple run
@@ -44,7 +44,7 @@ Model.decode(decoder::_FixedDecoder, x...; kwargs...) = DecodeResult(decoder.rec
     @test data1 == data2
     # warn: RECOVERY DOES NOT RETURN TO CODESPACE
     error_model = _FixedErrorModel(to_bsf("IIIII"))
-    decoder = _FixedDecoder(to_bsf("IIIIX"))
+    decoder = _FixedDecoder(DecodeResult(to_bsf("IIIIX")))
     @test_logs (:warn, "RECOVERY DOES NOT RETURN TO CODESPACE") #=
         =# data = qec_run_once(code, error_model, decoder, p)
     @test !data[:success]
@@ -54,7 +54,7 @@ end
     code = FiveQubitCode()
     error_model = DepolarizingErrorModel()
     decoder = NaiveDecoder()
-    p = 0.1
-    data = qec_run(code, error_model, decoder, p)
+    p = 0.25
+    data = qec_run(code, error_model, decoder, p; max_runs=1000)
     println("json=$(JSON.print(data, 4))")
 end
