@@ -56,13 +56,45 @@ end
 end
 
 @testset "qec_run" begin
+    # simple run
     code = FiveQubitCode()
     error_model = DepolarizingErrorModel()
     decoder = NaiveDecoder()
     p = 0.25
-    data = qec_run(code, error_model, decoder, p; max_runs=1000)
-    println("json=$(JSON.print(data, 4))")
-    #TODO: qec_run tests
+    max_runs = 1000
+    data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
+    JSON.print(data, 4)
+    expected_keys = Set([:code, :n_k_d, :time_steps, :error_model, :decoder,
+        :error_probability, :measurement_error_probability, :n_run, :n_success, :n_fail,
+        :n_logical_commutations, :custom_totals, :error_weight_total, :error_weight_pvar,
+        :logical_failure_rate, :physical_error_rate, :wall_time])
+    @test keys(data) == expected_keys
+    @test data[:n_run] == max_runs
+    @test data[:n_success] + data[:n_fail] == data[:n_run]
+    @test data[:n_success] >= 0 && data[:n_fail] >= 0
+    @test data[:n_fail] <= sum(data[:n_logical_commutations])
+    @test data[:logical_failure_rate] == data[:n_fail] / data[:n_run]
+    # physical_error_rate
+    p_rate = data[:physical_error_rate]
+    p_rate_std = sqrt(data[:error_weight_pvar] / (data[:n_k_d][1] ^ 2))
+    @test p_rate - p_rate_std < p < p_rate + p_rate_std
+    # run count
+    data = qec_run(code, error_model, decoder, p)
+    @test data[:n_run] == 1
+    data = qec_run(code, error_model, decoder, p; max_runs=10)
+    @test data[:n_run] == 10
+    data = qec_run(code, error_model, decoder, p; max_failures=2)
+    @test data[:n_fail] == 2
+    data = qec_run(code, error_model, decoder, p; max_runs=10, max_failures=3)
+    @test ((data[:n_run] == 10 && data[:n_fail] <= 3)
+        || (data[:n_run] <= 10 && data[:n_fail] == 3))
+    # seeded run
+    data1 = qec_run(code, error_model, decoder, p, 13; max_runs=max_runs)
+    data2 = qec_run(code, error_model, decoder, p, 13; max_runs=max_runs)
+    delete!(data1, :wall_time)
+    delete!(data2, :wall_time)
+    @test data1 == data2
+
     #TODO: implement DecodeResult handling with parameterized custom_values numeric vector
     #      (see https://docs.julialang.org/en/v1/manual/performance-tips/#Type-declarations)
     #TODO: qec_run/run_once: support custom_values, custom_totals
