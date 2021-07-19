@@ -91,15 +91,9 @@ function qec_run(
         n_success += data[:success] ? 1 : 0
         push!(error_weights, data[:error_weight])
         if n_run == 1  # initialize vector sums
-            n_logical_commutations = _null_copy(data[:logical_commutations])
+            n_logical_commutations = _null_vec_copy(data[:logical_commutations])
         else  # update vector sums
-            # NOTE: in-place is quicker!
-            # logical_commutations = data[:logical_commutations]
-            # for i in eachindex(n_logical_commutations)
-            #     n_logical_commutations[i] += logical_commutations[i]
-            # end
-            n_logical_commutations = _null_add(n_logical_commutations,
-                data[:logical_commutations])
+            _null_vec_add!(n_logical_commutations, data[:logical_commutations])
         end
     end
 
@@ -132,17 +126,13 @@ function qec_run(
     return runs_data
 end
 
-# return copy of vec_val (or nothing if null)
-function _null_copy(val)
-    isnothing(val) ? nothing : copy(val)
-end
-# return val1 + val2 (or nothing if both null; fails if one and only one is null)
-function _null_add(val1, val2)
-    if isnothing(val1) && isnothing(val2)
-        return nothing
-    end
-    return val1 + val2
-end
+# return copy of val (or nothing if null)
+_null_vec_copy(::Nothing) = nothing
+_null_vec_copy(val::AbstractVector) = copy(val)
+# update total adding val (or nothing if both null; MethodError if one and only one is null)
+_null_vec_add!(::Nothing, ::Nothing) = nothing
+_null_vec_add!(total::AbstractVector, val::AbstractVector) = total .+= val
+
 # set :logical_failure_rate and :physical_error_rate as defined in qec_run
 function _rate_statistics!(runs_data)
     # extract data
