@@ -10,7 +10,7 @@ using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister
 using Statistics: var
 
 # exports
-export qec_run_once, qec_run
+export RunResult, qec_run_once, qec_run
 
 """
     qec_run_once(code::StabilizerCode, error_model::ErrorModel, decoder::Decoder,
@@ -49,13 +49,31 @@ function qec_run_once(
     end
     success = s_commutes && l_commutes
     @debug "qec_run_once: success=$(success)"
-    data = Dict(
-        :error_weight => weight(error),
-        :logical_commutations => l_commutations,
-        :success => success,
-    )
-    return data
+    return RunResult(success, l_commutations, weight(error))
 end
+struct RunResult
+    success::Bool
+    logical_commutations::Vector{Bool}
+    error_weight::Int
+end
+# equality methods TODO: write equality macro
+function Base.hash(a::RunResult, h::UInt)
+    h = hash(typeof(a), h)
+    h = hash(a.success, h)
+    h = hash(a.logical_commutations, h)
+    return hash(a.error_weight, h)
+end
+function Base.:(==)(a::RunResult, b::RunResult)
+    return (a.success == b.success
+        && a.logical_commutations == b.logical_commutations
+        && a.error_weight == b.error_weight)
+end
+function Base.isequal(a::RunResult, b::RunResult)
+    return (isequal(a.success, b.success)
+        && isequal(a.logical_commutations, b.logical_commutations)
+        && isequal(a.error_weight, b.error_weight))
+end
+
 
 function qec_run(
     code::StabilizerCode,
@@ -88,12 +106,12 @@ function qec_run(
            && (isnothing(max_failures) || (n_run - n_success) < max_failures))
         data = qec_run_once(code, error_model, decoder, p, rng)
         n_run += 1
-        n_success += data[:success] ? 1 : 0
-        push!(error_weights, data[:error_weight])
+        n_success += data.success ? 1 : 0
+        push!(error_weights, data.error_weight)
         if n_run == 1  # initialize vector sums
-            n_logical_commutations = _null_vec_copy(data[:logical_commutations])
+            n_logical_commutations = _null_vec_copy(data.logical_commutations)
         else  # update vector sums
-            _null_vec_add!(n_logical_commutations, data[:logical_commutations])
+            _null_vec_add!(n_logical_commutations, data.logical_commutations)
         end
     end
 
