@@ -2,12 +2,22 @@ import Qecsim.Model
 
 using Test
 using Qecsim.App
-using Qecsim.BasicModels: FiveQubitCode
-using Qecsim.GenericModels: DepolarizingErrorModel, NaiveDecoder
-using Qecsim.Model: ErrorModel, Decoder, DecodeResult
-using Qecsim.PauliTools: to_bsf
+using Qecsim.BasicModels:FiveQubitCode
+using Qecsim.GenericModels:DepolarizingErrorModel, NaiveDecoder
+using Qecsim.Model:ErrorModel, Decoder, DecodeResult, logical_xs, logical_zs
+using Qecsim.PauliTools:to_bsf
 using JSON
-using Random: MersenneTwister
+using Random:MersenneTwister
+
+
+# TODO: implement DecodeResult handling with parameterized custom_values numeric vector
+#      (see https://docs.julialang.org/en/v1/manual/performance-tips/#Type-declarations)
+# TODO: qec_run/run_once: support custom_values, custom_totals
+# TODO: qec_run docs
+# TODO: qec_merge
+# TODO: CLI/file versions of qec_run and qec_merge
+# TODO: profiling / type-stability checks
+
 
 # test stub error model that generates a fixed given error
 struct _FixedErrorModel <: ErrorModel
@@ -22,6 +32,14 @@ struct _FixedDecoder <: Decoder
 end
 Model.label(::_FixedDecoder) = "fixed"
 Model.decode(decoder::_FixedDecoder, x...; kwargs...) = decoder.result
+
+struct _CycleDecoder <: Decoder
+    result_iter  # Iterator{DecodeResult}
+    _CycleDecoder(results) = new(Iterators.Stateful(Iterators.Cycle(results)))
+end
+Model.label(::_CycleDecoder) = "cycle"
+Model.decode(decoder::_CycleDecoder, x...; kwargs...) = popfirst!(decoder.result_iter)
+
 
 @testset "RunResult" begin
     r0 = RunResult(false, BitVector([0, 1]), 3)  # reference
@@ -49,10 +67,44 @@ end
     @test data1 == data2
     # warn: RECOVERY DOES NOT RETURN TO CODESPACE
     error_model = _FixedErrorModel(to_bsf("IIIII"))
-    decoder = _FixedDecoder(DecodeResult(to_bsf("IIIIX")))
+    decoder = _FixedDecoder(DecodeResult(recovery=to_bsf("IIIIX")))
     @test_logs (:warn, "RECOVERY DOES NOT RETURN TO CODESPACE") #=
         =# data = qec_run_once(code, error_model, decoder, p)
     @test !data.success
+end
+
+@testset "qec_run_once-override" begin
+    # common parameters
+    code = FiveQubitCode()
+    identity = to_bsf("IIIII")
+    error_model = _FixedErrorModel(identity)
+    p = 0.1
+    # tests with and without overrides
+    for (decode_result, expected) in [
+        # identity recovery
+        (DecodeResult(recovery=identity), RunResult(true, [0, 0], 0)),
+        # logical_x recovery
+        (DecodeResult(recovery=logical_xs(code)[1,:]), RunResult(false, [0, 1], 0)),
+        # logical_z recovery
+        (DecodeResult(recovery=logical_zs(code)[1,:]), RunResult(false, [1, 0], 0)),
+        # identity but override success=false
+        (DecodeResult(success=false, recovery=identity), RunResult(false, [0, 0], 0)),
+        # identity but override logical_commutations=[1, 1]
+        (DecodeResult(recovery=identity, logical_commutations=[1, 1]),
+            RunResult(true, [1, 1], 0)),
+        # identity but override success=false and logical_commutations=[1, 1]
+        (DecodeResult(success=false, recovery=identity, logical_commutations=[1, 1]),
+            RunResult(false, [1, 1], 0)),
+        # no-recovery but override success=false
+        (DecodeResult(success=false), RunResult(false, nothing, 0)),
+        # no-recovery but override success=false and logical_commutations=[1, 1]
+        (DecodeResult(success=false, logical_commutations=[1, 1]),
+            RunResult(false, [1, 1], 0)),
+    ]
+        decoder = _FixedDecoder(decode_result)
+        data = qec_run_once(code, error_model, decoder, p)
+        @test data == expected
+    end
 end
 
 @testset "qec_run" begin
@@ -76,7 +128,7 @@ end
     @test data[:logical_failure_rate] == data[:n_fail] / data[:n_run]
     # physical_error_rate
     p_rate = data[:physical_error_rate]
-    p_rate_std = sqrt(data[:error_weight_pvar] / (data[:n_k_d][1] ^ 2))
+    p_rate_std = sqrt(data[:error_weight_pvar] / (data[:n_k_d][1]^2))
     @test p_rate - p_rate_std < p < p_rate + p_rate_std
     # run count
     data = qec_run(code, error_model, decoder, p)
@@ -94,12 +146,53 @@ end
     delete!(data1, :wall_time)
     delete!(data2, :wall_time)
     @test data1 == data2
+end
 
-    #TODO: implement DecodeResult handling with parameterized custom_values numeric vector
-    #      (see https://docs.julialang.org/en/v1/manual/performance-tips/#Type-declarations)
-    #TODO: qec_run/run_once: support custom_values, custom_totals
-    #TODO: qec_run docs
-    #TODO: qec_merge
-    #TODO: CLI/file versions of qec_run and qec_merge
-    #TODO: test all major methods for type stability
+@testset "qec_run-override" begin
+    # common parameters
+    code = FiveQubitCode()
+    identity = to_bsf("IIIII")
+    error_model = _FixedErrorModel(identity)
+    p = 0.1
+    # tests with and without overrides
+    for (decode_result, max_runs, expected) in [
+        # identity recovery
+        (DecodeResult(recovery=identity), 1,
+            Dict(:n_fail => 0, :n_logical_commutations => [0, 0])),
+        # logical_x recovery
+        (DecodeResult(recovery=logical_xs(code)[1,:]), 2,
+            Dict(:n_fail => 2, :n_logical_commutations => [0, 2])),
+        # logical_z recovery
+        (DecodeResult(recovery=logical_zs(code)[1,:]), 3,
+            Dict(:n_fail => 3, :n_logical_commutations => [3, 0])),
+        # identity but override success=false
+        (DecodeResult(success=false, recovery=identity), 4,
+            Dict(:n_fail => 4, :n_logical_commutations => [0, 0])),
+        # identity but override logical_commutations=[1, 1]
+        (DecodeResult(recovery=identity, logical_commutations=[1, 1]), 5,
+            Dict(:n_fail => 0, :n_logical_commutations => [5, 5])),
+        # identity but override success=false and logical_commutations=[1, 1]
+        (DecodeResult(success=false, recovery=identity, logical_commutations=[1, 1]), 6,
+            Dict(:n_fail => 6, :n_logical_commutations => [6, 6])),
+        # no-recovery but override success=false
+        (DecodeResult(success=false), 7,
+            Dict(:n_fail => 7, :n_logical_commutations => nothing)),
+        # no-recovery but override success=false and logical_commutations=[1, 1]
+        (DecodeResult(success=false, logical_commutations=[1, 1]), 8,
+            Dict(:n_fail => 8, :n_logical_commutations => [8, 8])),
+    ]
+        decoder = _FixedDecoder(decode_result)
+        data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
+        @test issubset(expected, data)
+    end
+    # test that inconsistent overrides fail
+    for (decode_results, expected) in [
+        ([DecodeResult(success=true, logical_commutations=nothing),
+            DecodeResult(success=true, logical_commutations=[1, 0])], MethodError),
+        ([DecodeResult(success=true, logical_commutations=[1, 1, 0]),
+            DecodeResult(success=true, logical_commutations=[1, 0])], DimensionMismatch),
+    ]
+        decoder = _CycleDecoder(decode_results)
+        @test_throws expected qec_run(code, error_model, decoder, p; max_runs=5)
+    end
 end

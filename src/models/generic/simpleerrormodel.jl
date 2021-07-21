@@ -11,12 +11,12 @@ abstract type SimpleErrorModel <: ErrorModel end
     generate(error_model::SimpleErrorModel, code::StabilizerCode, p::Float64,
              [rng::AbstractRNG=GLOBAL_RNG]) -> BitVector
 
-Generate a new IID error based on [`probability_distribution`](@ref). See also
+Generate a new IID error based on [`Model.probability_distribution`](@ref). See also
 [`Model.generate`](@ref).
 
 !!! note
 
-    The method [`probability_distribution`](@ref) should be implemented for concrete
+    The method [`Model.probability_distribution`](@ref) should be implemented for concrete
     subtypes of [`SimpleErrorModel`](@ref).
 
 """

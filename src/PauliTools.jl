@@ -55,7 +55,7 @@ Pack a binary vector into a concise representation, typically for log output. Se
 
 # Examples
 ```jldoctest
-julia> a = BitVector([1, 0, 1, 0, 1, 1]);  # XYZ
+julia> a = BitVector([1, 0, 1, 0, 1, 1]);  # XZY
 
 julia> b = pack(a)  # (hex_value, length)
 ("2b", 6)
@@ -79,7 +79,7 @@ Unpack a binary vector from a concise representation, typically from log output.
 ```jldoctest
 julia> a = ("2b", 6);  # (hex_value, length)
 
-julia> b = unpack(a)  # XYZ
+julia> b = unpack(a)  # XZY
 6-element BitVector:
  1
  0

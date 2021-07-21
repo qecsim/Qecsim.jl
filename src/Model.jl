@@ -4,9 +4,9 @@ Abstract types and methods for codes, error models and decoders.
 module Model
 
 # imports
-using ..Qecsim: QecsimError
-using ..PauliTools: bsp
-using LinearAlgebra: I
+using ..Qecsim:QecsimError
+using ..PauliTools:bsp
+using LinearAlgebra:I
 
 # exports
 # - abstract model
@@ -129,7 +129,7 @@ If any of the following fail then a [`QecsimError`](@ref) is thrown:
 * ``L \odot L^T = \Lambda``
 
 where ``S`` and ``L`` are the code [`stabilizers`](@ref) and [`logicals`](@ref),
-respectively, and ``\odot`` and ``\Lambda`` are defined in [`bsp`](@ref).
+respectively, and ``\odot`` and ``\Lambda`` are defined in [`PauliTools.bsp`](@ref bsp).
 """
 function validate(code::StabilizerCode)
     s, l = stabilizers(code), logicals(code)
@@ -201,10 +201,12 @@ The syndrome has length equal to the number of code stabilizers, and element val
 or 1 (false or true) indicate whether the corresponding stabilizer does or does not commute
 with the error, respectively.
 
-Keyword parameters `kwargs` may be provided by the client with context values such as
-`error_model`, `error_probability` and `error`. Most implementations will ignore such
-parameters; however, if they are used, implementations should declare them explicitly and
-treat them as optional.
+Keyword parameters `kwargs` may be provided by the client, e.g. [`App`](@ref App), with
+context values such as `error_model`, `error_probability` and `error`. Most implementations
+will ignore such parameters; however, if they are used, implementations should declare them
+explicitly and treat them as optional.
+
+See also [`DecodeResult`](@ref).
 
 !!! note "Abstract method"
 
@@ -213,16 +215,48 @@ treat them as optional.
 function decode end
 
 """
-    DecodeResult(recovery::AbstractVector{Bool})
+    DecodeResult(; success::Union{Nothing, Bool}=nothing,
+        recovery::Union{Nothing, AbstractVector{Bool}}=nothing,
+        logical_commutations::Union{Nothing, AbstractVector{Bool}}=nothing)
 
-Construct a decoding result including the recovery operation.
+Construct a decoding result as returned by [`decode`](@ref).
 
-!!! warning
+Typically decoders will provide a `recovery` operation and delegate the evaluation of
+`success` and `logical_commutations` to the client, e.g. [`App`](@ref App). Optionally,
+`success` and/or `logical_commutations` may be provided as overrides. At least one of
+`recovery` or `success` must be specified to allow a success value to be resolved. If
+`logical_commutations` are provided then they should be of consistent type and size over
+identically parameterized simulation runs so that they can be summed across runs.
 
-    In the future, this type will be extended to include success flags and more.
+See also [`decode`](@ref).
+
+# Examples
+```jldoctest
+julia> DecodeResult(recovery=BitVector([1, 0, 1, 0, 1, 1]))  # typical use-case
+DecodeResult(nothing, Bool[1, 0, 1, 0, 1, 1], nothing)
+
+julia> DecodeResult(success=true)  # override success
+DecodeResult(true, nothing, nothing)
+
+julia> DecodeResult(success=false, logical_commutations=BitVector([1, 0]))  # override all
+DecodeResult(false, nothing, Bool[1, 0])
+
+julia> DecodeResult(success=nothing, recovery=nothing)  # insufficient parameters
+ERROR: QecsimError: at least one of 'success' or 'recovery' must be specified
+Stacktrace:
+[...]
+```
 """
 struct DecodeResult
-    recovery::BitVector
+    success::Union{Nothing,Bool}
+    recovery::Union{Nothing,BitVector}
+    logical_commutations::Union{Nothing,BitVector}
+    function DecodeResult(;success=nothing, recovery=nothing, logical_commutations=nothing)
+        if isnothing(success) && isnothing(recovery)
+            throw(QecsimError("at least one of 'success' or 'recovery' must be specified"))
+        end
+        new(success, recovery, logical_commutations)
+    end
 end
 
 end

@@ -5,9 +5,9 @@ module App
 
 # imports
 using ..Model
-using ..PauliTools: bsp, pack, weight
-using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister
-using Statistics: var
+using ..PauliTools:bsp, pack, weight
+using Random:AbstractRNG, GLOBAL_RNG, MersenneTwister
+using Statistics:var
 
 # exports
 export RunResult, qec_run_once, qec_run
@@ -16,7 +16,9 @@ export RunResult, qec_run_once, qec_run
     qec_run_once(code::StabilizerCode, error_model::ErrorModel, decoder::Decoder,
         p::Float64, rng::AbstractRNG=GLOBAL_RNG)
 
-Run a stabilizer code error-decode-recovery (ideal) simulation and return run data.
+Execute a stabilizer code error-decode-recovery (ideal) simulation and return run result.
+
+TODO: complete doc
 """
 function qec_run_once(
     code::StabilizerCode,
@@ -32,28 +34,45 @@ function qec_run_once(
     ctx = Dict(:error_model => error_model, :p => p, :error => error)
     result = decode(decoder, code, syndrome; ctx...)
     @debug "qec_run_once: result=$(result)" result
-    recovered = xor.(error, result.recovery)
-    @debug "qec_run_once: recovered=$(recovered)" recovered
-    s_commutations = bsp(stabilizers(code), recovered)
-    l_commutations = bsp(logicals(code), recovered)
-    @debug "qec_run_once: stablizer_commutations=$(s_commutations)" s_commutations
-    @debug "qec_run_once: logical_commutations=$(l_commutations)" l_commutations
-    s_commutes = !any(s_commutations)
-    l_commutes = !any(l_commutations)
-    if !s_commutes
-        log_data = Dict(  # pack to concise string format
-            :error => pack(error),
-            :recovery => pack(result.recovery),
-        )
-        @warn "RECOVERY DOES NOT RETURN TO CODESPACE" log_data...
-    end
-    success = s_commutes && l_commutes
+    success, l_commutations = _resolve_decoding(result.recovery, result.success,
+        result.logical_commutations, code, error)
     @debug "qec_run_once: success=$(success)"
+    @debug "qec_run_once: logical_commutations=$(l_commutations)"
     return RunResult(success, l_commutations, weight(error))
 end
+
+# resolve tuple (success, logical_commutations)
+function _resolve_decoding(::Nothing, success, logical_commutations, code, error)
+    # recovery is null, so just return overrides
+    return (success, logical_commutations)
+end
+function _resolve_decoding(recovery, success, logical_commutations, code, error)
+    # recovery is not null, so evaluate success and logical_commutations
+    recovered = xor.(error, recovery)
+    s_comms = bsp(stabilizers(code), recovered)
+    l_comms = bsp(logicals(code), recovered)
+    s_commutes = !any(s_comms)
+    l_commutes = !any(l_comms)
+    if !s_commutes
+        @warn "RECOVERY DOES NOT RETURN TO CODESPACE" pack(error) pack(recovery)
+    end
+    # apply overrides
+    resolved_success = isnothing(success) ? s_commutes && l_commutes : success
+    resolved_l_comms = isnothing(logical_commutations) ? l_comms : logical_commutations
+    return (resolved_success, resolved_l_comms)
+end
+
+"""
+    RunResult(success::Bool, logical_commutations::Union{Nothing,AbstractVector{Bool}}
+        error_weight::Int)
+
+Construct run result.
+
+TODO: complete doc
+"""
 struct RunResult
     success::Bool
-    logical_commutations::Vector{Bool}
+    logical_commutations::Union{Nothing,BitVector}
     error_weight::Int
 end
 # equality methods TODO: write equality macro
@@ -75,20 +94,30 @@ function Base.isequal(a::RunResult, b::RunResult)
 end
 
 
+"""
+    qec_run(code::StabilizerCode, error_model::ErrorModel, decoder::Decoder,
+        p::Float64, random_seed;
+        max_runs::Union{Int,Nothing}=nothing, max_failures::Union{Int,Nothing}=nothing)
+
+Execute stabilizer code error-decode-recovery (ideal) simulations many times and return
+aggregated run data.
+
+TODO: complete doc
+"""
 function qec_run(
     code::StabilizerCode,
     error_model::ErrorModel,
     decoder::Decoder,
     p::Float64,
     random_seed=nothing;
-    max_runs::Union{Int, Nothing}=nothing,
-    max_failures::Union{Int, Nothing}=nothing,
+    max_runs::Union{Int,Nothing}=nothing,
+    max_failures::Union{Int,Nothing}=nothing,
 )
     # derived defaults
     max_runs = isnothing(max_runs) && isnothing(max_failures) ? 1 : max_runs
 
-    @info "qec_run: starting" code=code error_model=error_model decoder=decoder p=p #=
-        =# random_seed=random_seed max_runs=max_runs max_failures=max_failures
+    @info "qec_run: starting" code = code error_model = error_model decoder = decoder p = p #=
+        =# random_seed = random_seed max_runs = max_runs max_failures = max_failures
     wall_time_start = time_ns()
 
     rng = MersenneTwister(random_seed)
@@ -98,12 +127,13 @@ function qec_run(
     n_run = n_success = 0
     error_weights = Int[]
     if !isnothing(max_runs) sizehint!(error_weights, max_runs) end
-    n_logical_commutations::Union{Nothing, Vector{Int}} = nothing  # promote to Int[]
+    n_logical_commutations::Union{Nothing,Vector{Int}} = nothing  # promote to Int[]
     custom_totals = nothing
 
     # do runs
     while ((isnothing(max_runs) || n_run < max_runs)
-           && (isnothing(max_failures) || (n_run - n_success) < max_failures))
+        && (isnothing(max_failures) || (n_run - n_success) < max_failures)
+    )
         data = qec_run_once(code, error_model, decoder, p, rng)
         n_run += 1
         n_success += data.success ? 1 : 0
