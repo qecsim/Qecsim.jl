@@ -14,7 +14,7 @@ export RunResult, qec_run_once, qec_run
 
 """
     qec_run_once(code::StabilizerCode, error_model::ErrorModel, decoder::Decoder,
-        p::Float64, rng::AbstractRNG=GLOBAL_RNG)
+                 p::Float64, rng::AbstractRNG=GLOBAL_RNG)
 
 Execute a stabilizer code error-decode-recovery (ideal) simulation and return run result.
 
@@ -64,7 +64,7 @@ end
 
 """
     RunResult(success::Bool, logical_commutations::Union{Nothing,AbstractVector{Bool}}
-        error_weight::Int)
+              error_weight::Int)
 
 Construct run result.
 
@@ -96,8 +96,8 @@ end
 
 """
     qec_run(code::StabilizerCode, error_model::ErrorModel, decoder::Decoder,
-        p::Float64, random_seed;
-        max_runs::Union{Int,Nothing}=nothing, max_failures::Union{Int,Nothing}=nothing)
+            p::Float64, random_seed;
+            max_runs::Union{Int,Nothing}=nothing, max_failures::Union{Int,Nothing}=nothing)
 
 Execute stabilizer code error-decode-recovery (ideal) simulations many times and return
 aggregated run data.

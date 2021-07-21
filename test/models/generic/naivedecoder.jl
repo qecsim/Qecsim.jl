@@ -2,8 +2,8 @@ using Test
 
 using Qecsim.GenericModels
 using Qecsim.Model
-using Qecsim.BasicModels: FiveQubitCode, SteaneCode
-using Qecsim.PauliTools: bsp, to_bsf
+using Qecsim.BasicModels:FiveQubitCode, SteaneCode
+using Qecsim.PauliTools:bsp, to_bsf
 
 @testset "NaiveDecoder" begin
     decoder = NaiveDecoder()

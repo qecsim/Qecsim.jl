@@ -105,7 +105,7 @@ function logicals(code::StabilizerCode)
 end
 
 """
-    nkd(code::StabilizerCode) -> Tuple{Int, Int, Union{Int, Missing}}
+    nkd(code::StabilizerCode) -> Tuple{Int,Int,Union{Int,Missing}}
 
 Return a descriptor in the format `(n, k, d)`, where `n` is the number of physical qubits,
 `k` is the number of logical qubits, and `d` is the distance of the code (or `missing` if
@@ -168,7 +168,7 @@ where `p` is typically the probability of an error on a single qubit.
 function generate end
 
 """
-    probability_distribution(error_model::ErrorModel, p::Float64) -> NTuple{4, Real}
+    probability_distribution(error_model::ErrorModel, p::Float64) -> NTuple{4,Real}
 
 Return the single-qubit probability distribution amongst Pauli I, X, Y and Z, where `p` is
 the overall probability of an error on a single qubit.
@@ -215,9 +215,9 @@ See also [`DecodeResult`](@ref).
 function decode end
 
 """
-    DecodeResult(; success::Union{Nothing, Bool}=nothing,
-        recovery::Union{Nothing, AbstractVector{Bool}}=nothing,
-        logical_commutations::Union{Nothing, AbstractVector{Bool}}=nothing)
+    DecodeResult(; success::Union{Nothing,Bool}=nothing,
+                 recovery::Union{Nothing,AbstractVector{Bool}}=nothing,
+                 logical_commutations::Union{Nothing,AbstractVector{Bool}}=nothing)
 
 Construct a decoding result as returned by [`decode`](@ref).
 

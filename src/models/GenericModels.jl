@@ -7,10 +7,10 @@ module GenericModels
 import ..Model
 
 using ..Model
-using ..PauliTools: bsp, to_bsf
-using Combinatorics: combinations
-using Random: AbstractRNG, GLOBAL_RNG
-using StatsBase: ProbabilityWeights, sample
+using ..PauliTools:bsp, to_bsf
+using Combinatorics:combinations
+using Random:AbstractRNG, GLOBAL_RNG
+using StatsBase:ProbabilityWeights, sample
 
 # exports
 # - error models
