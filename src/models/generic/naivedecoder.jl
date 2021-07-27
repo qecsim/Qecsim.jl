@@ -13,8 +13,8 @@ and resolves to the first error that matches the syndrome.
 """
 struct NaiveDecoder <: Decoder
     max_qubits::Int
+    NaiveDecoder(max_qubits=10) = new(max_qubits)
 end
-NaiveDecoder(max_qubits=10) = NaiveDecoder(max_qubits)
 Model.label(::NaiveDecoder) = "Naive"
 function Model.decode(
     decoder::NaiveDecoder,
