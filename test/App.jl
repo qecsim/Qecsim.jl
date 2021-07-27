@@ -9,10 +9,7 @@ using Qecsim.PauliTools:to_bsf
 using JSON
 using Random:MersenneTwister
 
-
-# TODO: implement DecodeResult handling with parameterized custom_values numeric vector
-#      (see https://docs.julialang.org/en/v1/manual/performance-tips/#Type-declarations)
-# TODO: qec_run/run_once: support custom_values, custom_totals
+# TODO: qec_run: support custom_values, custom_totals
 # TODO: qec_run docs
 # TODO: qec_merge
 # TODO: CLI/file versions of qec_run and qec_merge
@@ -42,15 +39,19 @@ Model.decode(decoder::_CycleDecoder, x...; kwargs...) = popfirst!(decoder.result
 
 
 @testset "RunResult" begin
-    r0 = RunResult(false, BitVector([0, 1]), 3)  # reference
-    r1 = RunResult(false, BitVector([0, 1]), 3)  # same
-    r2 = RunResult(true, BitVector([0, 1]), 3)   # different success
-    r3 = RunResult(false, BitVector([0, 0]), 3)  # different logical_commutations
-    r4 = RunResult(false, BitVector([0, 1]), 4)  # different error_weight
+    r0 = RunResult(false, 3, BitVector([0, 1]), nothing)  # reference
+    r1 = RunResult(false, 3, BitVector([0, 1]), nothing)  # same
+    r2 = RunResult(true, 3, BitVector([0, 1]), nothing)   # different success
+    r3 = RunResult(false, 3, BitVector([0, 0]), nothing)  # different logical_commutations
+    r4 = RunResult(false, 4, BitVector([0, 1]), nothing)  # different error_weight
     @test r1 == r0 && hash(r1) == hash(r0)
     @test r2 != r0 && hash(r2) != hash(r0)
     @test r3 != r0 && hash(r3) != hash(r0)
     @test r4 != r0 && hash(r4) != hash(r0)
+    @test isequal(r1, r0) && hash(r1) == hash(r0)
+    @test !isequal(r2, r0) && hash(r2) != hash(r0)
+    @test !isequal(r3, r0) && hash(r3) != hash(r0)
+    @test !isequal(r4, r0) && hash(r4) != hash(r0)
 end
 
 @testset "qec_run_once" begin
@@ -82,24 +83,29 @@ end
     # tests with and without overrides
     for (decode_result, expected) in [
         # identity recovery
-        (DecodeResult(recovery=identity), RunResult(true, [0, 0], 0)),
+        (DecodeResult(recovery=identity),
+            RunResult(true, 0, BitVector([0, 0]), nothing)),
         # logical_x recovery
-        (DecodeResult(recovery=logical_xs(code)[1,:]), RunResult(false, [0, 1], 0)),
+        (DecodeResult(recovery=logical_xs(code)[1,:]),
+            RunResult(false, 0, BitVector([0, 1]), nothing)),
         # logical_z recovery
-        (DecodeResult(recovery=logical_zs(code)[1,:]), RunResult(false, [1, 0], 0)),
+        (DecodeResult(recovery=logical_zs(code)[1,:]),
+            RunResult(false, 0, BitVector([1, 0]), nothing)),
         # identity but override success=false
-        (DecodeResult(success=false, recovery=identity), RunResult(false, [0, 0], 0)),
+        (DecodeResult(success=false, recovery=identity),
+            RunResult(false, 0, BitVector([0, 0]), nothing)),
         # identity but override logical_commutations=[1, 1]
         (DecodeResult(recovery=identity, logical_commutations=[1, 1]),
-            RunResult(true, [1, 1], 0)),
+            RunResult(true, 0, BitVector([1, 1]), nothing)),
         # identity but override success=false and logical_commutations=[1, 1]
         (DecodeResult(success=false, recovery=identity, logical_commutations=[1, 1]),
-            RunResult(false, [1, 1], 0)),
+            RunResult(false, 0, BitVector([1, 1]), nothing)),
         # no-recovery but override success=false
-        (DecodeResult(success=false), RunResult(false, nothing, 0)),
+        (DecodeResult(success=false),
+            RunResult(false, 0, nothing, nothing)),
         # no-recovery but override success=false and logical_commutations=[1, 1]
         (DecodeResult(success=false, logical_commutations=[1, 1]),
-            RunResult(false, [1, 1], 0)),
+            RunResult(false, 0, BitVector([1, 1]), nothing)),
     ]
         decoder = _FixedDecoder(decode_result)
         data = qec_run_once(code, error_model, decoder, p)

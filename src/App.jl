@@ -38,7 +38,7 @@ function qec_run_once(
         result.logical_commutations, code, error)
     @debug "qec_run_once: success=$(success)"
     @debug "qec_run_once: logical_commutations=$(l_commutations)"
-    return RunResult(success, l_commutations, weight(error))
+    return RunResult(success, weight(error), l_commutations, result.custom_values)
 end
 
 # resolve tuple (success, logical_commutations)
@@ -63,34 +63,41 @@ function _resolve_decoding(recovery, success, logical_commutations, code, error)
 end
 
 """
-    RunResult(success::Bool, logical_commutations::Union{Nothing,AbstractVector{Bool}}
-              error_weight::Int)
+    RunResult(success::Bool, error_weight::Int,
+              logical_commutations::Union{Nothing,AbstractVector{Bool}}
+              custom_values::Union{Nothing,Vector{<:Real}}
+              )
 
 Construct run result.
 
 TODO: complete doc
 """
-struct RunResult
+struct RunResult{T<:Union{Nothing,Vector{<:Real}}}
     success::Bool
-    logical_commutations::Union{Nothing,BitVector}
     error_weight::Int
+    logical_commutations::Union{Nothing,BitVector}
+    custom_values::T
 end
 # equality methods TODO: write equality macro
 function Base.hash(a::RunResult, h::UInt)
     h = hash(typeof(a), h)
     h = hash(a.success, h)
+    h = hash(a.error_weight, h)
     h = hash(a.logical_commutations, h)
-    return hash(a.error_weight, h)
+    h = hash(a.custom_values, h)
+    return h
 end
 function Base.:(==)(a::RunResult, b::RunResult)
     return (a.success == b.success
+        && a.error_weight == b.error_weight
         && a.logical_commutations == b.logical_commutations
-        && a.error_weight == b.error_weight)
+        && a.custom_values == b.custom_values)
 end
 function Base.isequal(a::RunResult, b::RunResult)
     return (isequal(a.success, b.success)
+        && isequal(a.error_weight, b.error_weight)
         && isequal(a.logical_commutations, b.logical_commutations)
-        && isequal(a.error_weight, b.error_weight))
+        && isequal(a.custom_values, b.custom_values))
 end
 
 
