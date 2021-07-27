@@ -9,8 +9,7 @@ using Qecsim.PauliTools:to_bsf
 using JSON
 using Random:MersenneTwister
 
-# TODO: qec_run: support custom_values, custom_totals
-# TODO: qec_run docs
+# TODO: qec_run_once, RunResult, qec_run docs
 # TODO: qec_merge
 # TODO: CLI/file versions of qec_run and qec_merge
 # TODO: profiling / type-stability checks
@@ -161,33 +160,43 @@ end
     error_model = _FixedErrorModel(identity)
     p = 0.1
     # tests with and without overrides
-    for (decode_result, max_runs, expected) in [
+    for (decoder, max_runs, expected) in [
         # identity recovery
-        (DecodeResult(recovery=identity), 1,
-            Dict(:n_fail => 0, :n_logical_commutations => [0, 0])),
+        (_FixedDecoder(DecodeResult(recovery=identity)), 1,
+            Dict(:n_success => 1, :n_fail => 0, :n_logical_commutations => [0, 0])),
         # logical_x recovery
-        (DecodeResult(recovery=logical_xs(code)[1,:]), 2,
-            Dict(:n_fail => 2, :n_logical_commutations => [0, 2])),
+        (_FixedDecoder(DecodeResult(recovery=logical_xs(code)[1,:])), 2,
+            Dict(:n_success => 0, :n_fail => 2, :n_logical_commutations => [0, 2])),
         # logical_z recovery
-        (DecodeResult(recovery=logical_zs(code)[1,:]), 3,
-            Dict(:n_fail => 3, :n_logical_commutations => [3, 0])),
+        (_FixedDecoder(DecodeResult(recovery=logical_zs(code)[1,:])), 3,
+            Dict(:n_success => 0, :n_fail => 3, :n_logical_commutations => [3, 0])),
         # identity but override success=false
-        (DecodeResult(success=false, recovery=identity), 4,
-            Dict(:n_fail => 4, :n_logical_commutations => [0, 0])),
+        (_FixedDecoder(DecodeResult(success=false, recovery=identity)), 4,
+            Dict(:n_success => 0, :n_fail => 4, :n_logical_commutations => [0, 0])),
         # identity but override logical_commutations=[1, 1]
-        (DecodeResult(recovery=identity, logical_commutations=[1, 1]), 5,
-            Dict(:n_fail => 0, :n_logical_commutations => [5, 5])),
+        (_FixedDecoder(DecodeResult(recovery=identity, logical_commutations=[1, 1])), 5,
+            Dict(:n_success => 0, :n_success => 5, :n_fail => 0, :n_logical_commutations => [5, 5])),
         # identity but override success=false and logical_commutations=[1, 1]
-        (DecodeResult(success=false, recovery=identity, logical_commutations=[1, 1]), 6,
-            Dict(:n_fail => 6, :n_logical_commutations => [6, 6])),
+        (_FixedDecoder(DecodeResult(success=false, recovery=identity,
+            logical_commutations=[1, 1])), 6,
+            Dict(:n_success => 0, :n_fail => 6, :n_logical_commutations => [6, 6])),
         # no-recovery but override success=false
-        (DecodeResult(success=false), 7,
-            Dict(:n_fail => 7, :n_logical_commutations => nothing)),
+        (_FixedDecoder(DecodeResult(success=false)), 7,
+            Dict(:n_success => 0, :n_fail => 7, :n_logical_commutations => nothing)),
         # no-recovery but override success=false and logical_commutations=[1, 1]
-        (DecodeResult(success=false, logical_commutations=[1, 1]), 8,
-            Dict(:n_fail => 8, :n_logical_commutations => [8, 8])),
+        (_FixedDecoder(DecodeResult(success=false, logical_commutations=[1, 1])), 8,
+            Dict(:n_success => 0, :n_fail => 8, :n_logical_commutations => [8, 8])),
+        # no-recovery but override success=false and custom_values=[1, 1]
+        (_FixedDecoder(DecodeResult(success=false, custom_values=[1, 1])), 9,
+            Dict(:n_success => 0, :n_fail => 9, :custom_totals => [9, 9])),
+        # no-recovery but override success=false and custom_values=[1., 1.]
+        (_FixedDecoder(DecodeResult(success=false, custom_values=[1., 1.])), 10,
+            Dict(:n_success => 0, :n_fail => 10, :custom_totals => [10., 10.])),
+        # no-recovery but override success=false/true and custom_values=[1, 1]/[2, 3]
+        (_CycleDecoder([DecodeResult(success=false, custom_values=[1, 1]),
+            DecodeResult(success=true, custom_values=[2, 3])]), 11,
+            Dict(:n_success => 5, :n_fail => 6, :custom_totals => [16, 21])),
     ]
-        decoder = _FixedDecoder(decode_result)
         data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
         @test issubset(expected, data)
     end
@@ -197,6 +206,8 @@ end
             DecodeResult(success=true, logical_commutations=[1, 0])], MethodError),
         ([DecodeResult(success=true, logical_commutations=[1, 1, 0]),
             DecodeResult(success=true, logical_commutations=[1, 0])], DimensionMismatch),
+        ([DecodeResult(success=true, custom_values=[1, 0]),
+            DecodeResult(success=true, custom_values=[1.1, 0.1])], InexactError),
     ]
         decoder = _CycleDecoder(decode_results)
         @test_throws expected qec_run(code, error_model, decoder, p; max_runs=5)

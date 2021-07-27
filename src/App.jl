@@ -147,8 +147,10 @@ function qec_run(
         push!(error_weights, data.error_weight)
         if n_run == 1  # initialize vector sums
             n_logical_commutations = _null_vec_copy(data.logical_commutations)
+            custom_totals = _null_vec_copy(data.custom_values)
         else  # update vector sums
             _null_vec_add!(n_logical_commutations, data.logical_commutations)
+            _null_vec_add!(custom_totals, data.custom_values)
         end
     end
 
