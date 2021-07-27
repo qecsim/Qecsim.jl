@@ -6,6 +6,5 @@
 [![Coverage](https://codecov.io/gh/dkt29/Qecsim.jl/branch/main/graph/badge.svg?token=RDJNP9JX32)](https://codecov.io/gh/dkt29/Qecsim.jl)
 
 Qecsim.jl is a ground-up rewrite of the Python package
-[qecsim](https://github.com/qecsim/qecsim). It is under active development. No
-public release is currently available. The API is subject to change without
-notice.
+[qecsim](https://github.com/qecsim/qecsim). No public release of Qecsim.jl is
+currently available. The API is subject to change without notice.
