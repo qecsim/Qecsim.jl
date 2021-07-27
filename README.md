@@ -7,4 +7,4 @@
 
 Qecsim.jl is a ground-up rewrite of the Python package
 [qecsim](https://github.com/qecsim/qecsim). No public release of Qecsim.jl is
-currently available. The API is subject to change without notice.
+currently available and the API is subject to change without notice.
