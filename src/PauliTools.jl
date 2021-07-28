@@ -99,6 +99,7 @@ end
 
 """
     to_bsf(pauli::Union{AbstractString,AbstractVector{<:AbstractString}})
+        -> Union{BitVector,BitMatrix}
 
 Convert the Pauli string operator(s) to binary symplectic form.
 
@@ -138,7 +139,7 @@ function to_bsf(paulis::AbstractVector{<:AbstractString})
 end
 
 """
-    to_pauli(bsf::AbstractVecOrMat{Bool})
+    to_pauli(bsf::AbstractVecOrMat{Bool}) -> Union{String,Vector{String}}
 
 Convert the binary symplectic form to Pauli string operator(s).
 

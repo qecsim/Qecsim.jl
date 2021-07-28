@@ -12,9 +12,9 @@ using Statistics:var
 # exports
 export RunResult, qec_run_once, qec_run
 
-"""
-    qec_run_once(code::StabilizerCode, error_model::ErrorModel, decoder::Decoder,
-                 p::Float64, rng::AbstractRNG=GLOBAL_RNG) -> RunResult
+@doc raw"""
+    qec_run_once(code, error_model, decoder, p::Float64, rng::AbstractRNG=GLOBAL_RNG)
+        -> RunResult
 
 Execute a stabilizer code error-decode-recovery (ideal) simulation and return run result.
 
@@ -22,7 +22,28 @@ The parameters `code`, `error_model` and `decoder` should be concrete subtypes o
 implementations of [`StabilizerCode`](@ref), [`ErrorModel`](@ref) and [`Decoder`](@ref),
 respectively.
 
-TODO: complete doc
+A simulation follows the following algorithm:
+
+1. ``S ←`` `stabilizers(code)`
+2. ``L ←`` `logicals(code)`
+3. ``e ←`` `generate(error_model, code, p, rng)`
+4. ``y ← S ⊙ e``
+5. `decode_result` ``←`` `decode(decoder, code,` ``y```; kwargs...)`
+6. ``r ←`` `decode_result.recovery`
+7. sanity check: ``S \odot (r \oplus e) = 0``
+8. `logical_commutations` ``← L \odot (r \oplus e)``
+8. `success` ``← L \odot (r \oplus e) = 0``
+
+The `kwargs` passed to [`decode`](@ref) include `error_model`, `p` and `error`; most
+decoders will ignore these parameters. The [`decode`](@ref) method returns a
+[`DecodeResult`](@ref). If `decode_result.success` and/or
+`decode_result.logical_commutations` are specified, they override the values of `success`
+and `logical_commutations`, irrespective of whether `decode_result.recovery` is specified or
+not. The value `decode_result.custom_values` is passed through in the run result.
+
+See also [`RunResult`](@ref).
+
+TODO: doctest
 """
 function qec_run_once(code, error_model, decoder, p::Float64, rng::AbstractRNG=GLOBAL_RNG)
     error = generate(error_model, code, p, rng)
@@ -62,12 +83,12 @@ end
 
 """
     RunResult(success::Bool, error_weight::Int,
-              logical_commutations::Union{Nothing,AbstractVector{Bool}}
+              logical_commutations::Union{Nothing,BitVector}
               custom_values::Union{Nothing,Vector{<:Real}})
 
-Construct run result.
+Construct a run result as returned by [`qec_run_once`](@ref).
 
-TODO: complete doc
+TODO: doctest
 """
 struct RunResult{T<:Union{Nothing,Vector{<:Real}}}
     success::Bool
@@ -101,6 +122,7 @@ end
 """
     qec_run(code, error_model, decoder, p::Float64, random_seed=nothing;
             max_runs::Union{Int,Nothing}=nothing, max_failures::Union{Int,Nothing}=nothing)
+        -> Dict
 
 Execute stabilizer code error-decode-recovery (ideal) simulations many times and return
 aggregated run data.
