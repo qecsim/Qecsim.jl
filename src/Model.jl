@@ -32,13 +32,14 @@ Abstract supertype for models.
 abstract type AbstractModel end
 
 """
-    label(code::AbstractModel) -> String
+    label(model) -> String
 
 Return a label suitable for use in plots and for grouping results.
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes of [`AbstractModel`](@ref).
+    This method should be implemented for concrete subtypes or duck-typed implementations of
+    [`AbstractModel`](@ref).
 """
 function label end
 
@@ -53,7 +54,7 @@ Abstract supertype for stabilizer codes.
 abstract type StabilizerCode <: AbstractModel end
 
 """
-    stabilizers(code::StabilizerCode) -> BitMatrix
+    stabilizers(code) -> BitMatrix
 
 Return the stabilizers in binary symplectic form.
 
@@ -62,12 +63,13 @@ simplify decoding.
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes of [`StabilizerCode`](@ref).
+    This method should be implemented for concrete subtypes or duck-typed implementations of
+    [`StabilizerCode`](@ref).
 """
 function stabilizers end
 
 """
-    logical_xs(code::StabilizerCode) -> BitMatrix
+    logical_xs(code) -> BitMatrix
 
 Return the logical X operators in binary symplectic form.
 
@@ -75,12 +77,13 @@ Each row is an operator. The order should match that of [`logical_zs`](@ref).
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes of [`StabilizerCode`](@ref).
+    This method should be implemented for concrete subtypes or duck-typed implementations of
+    [`StabilizerCode`](@ref).
 """
 function logical_xs end
 
 """
-    logical_zs(code::StabilizerCode) -> BitMatrix
+    logical_zs(code) -> BitMatrix
 
 Return the logical Z operators in binary symplectic form.
 
@@ -88,24 +91,25 @@ Each row is an operator. The order should match that of [`logical_xs`](@ref).
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes of [`StabilizerCode`](@ref).
+    This method should be implemented for concrete subtypes or duck-typed implementations of
+    [`StabilizerCode`](@ref).
 """
 function logical_zs end
 
 """
-    logicals(code::StabilizerCode) -> BitMatrix
+    logicals(code) -> BitMatrix
 
 Return the logical operators in binary symplectic form.
 
 Each row is an operator. X operators are stacked above Z operators in the order given by
 [`logical_xs`](@ref) and [`logical_zs`](@ref).
 """
-function logicals(code::StabilizerCode)
+function logicals(code)
     return vcat(logical_xs(code), logical_zs(code))
 end
 
 """
-    nkd(code::StabilizerCode) -> Tuple{Int,Int,Union{Int,Missing}}
+    nkd(code) -> Tuple{Int,Int,Union{Int,Missing}}
 
 Return a descriptor in the format `(n, k, d)`, where `n` is the number of physical qubits,
 `k` is the number of logical qubits, and `d` is the distance of the code (or `missing` if
@@ -113,12 +117,13 @@ unknown).
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes of [`StabilizerCode`](@ref).
+    This method should be implemented for concrete subtypes or duck-typed implementations of
+    [`StabilizerCode`](@ref).
 """
 function nkd end
 
 @doc raw"""
-    validate(code::StabilizerCode)
+    validate(code)
 
 Perform sanity checks.
 
@@ -131,7 +136,7 @@ If any of the following fail then a [`QecsimError`](@ref) is thrown:
 where ``S`` and ``L`` are the code [`stabilizers`](@ref) and [`logicals`](@ref),
 respectively, and ``\odot`` and ``\Lambda`` are defined in [`PauliTools.bsp`](@ref bsp).
 """
-function validate(code::StabilizerCode)
+function validate(code)
     s, l = stabilizers(code), logicals(code)
     !any(bsp(s, transpose(s))) || throw(QecsimError("stabilizers do not mutually commute"))
     !any(bsp(s, transpose(l))) || throw(QecsimError(
@@ -155,20 +160,20 @@ Abstract supertype for error models.
 abstract type ErrorModel <: AbstractModel end
 
 """
-    generate(error_model::ErrorModel, code::StabilizerCode, p::Float64,
-             [rng::AbstractRNG=GLOBAL_RNG]) -> BitVector
+    generate(error_model, code, p::Float64, [rng::AbstractRNG=GLOBAL_RNG]) -> BitVector
 
 Generate a new error in binary symplectic form according to the `error_model` and `code`,
 where `p` is typically the probability of an error on a single qubit.
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes of [`ErrorModel`](@ref).
+    This method should be implemented for concrete subtypes or duck-typed implementations of
+    [`ErrorModel`](@ref).
 """
 function generate end
 
 """
-    probability_distribution(error_model::ErrorModel, p::Float64) -> NTuple{4,Real}
+    probability_distribution(error_model, p::Float64) -> NTuple{4,Real}
 
 Return the single-qubit probability distribution amongst Pauli I, X, Y and Z, where `p` is
 the overall probability of an error on a single qubit.
@@ -176,8 +181,9 @@ the overall probability of an error on a single qubit.
 !!! note "Abstract method [optional]"
 
     This method is **not** invoked by any core modules. Since it is often useful for
-    decoders, it is provided as a template and concrete subtypes of [`ErrorModel`](@ref) are
-    encouraged to implement it when appropriate, particularly for IID error models.
+    decoders, it is provided as a template and concrete subtypes or duck-typed
+    implementations of [`ErrorModel`](@ref) are encouraged to implement it when appropriate,
+    particularly for IID error models.
 """
 function probability_distribution end
 
@@ -191,8 +197,7 @@ Abstract supertype for decoders.
 abstract type Decoder <: AbstractModel end
 
 """
-    decode(decoder::Decoder, code::StabilizerCode, syndrome::AbstractVector{Bool};
-           kwargs...) -> DecodeResult
+    decode(decoder, code, syndrome::AbstractVector{Bool}; kwargs...) -> DecodeResult
 
 Resolve a recovery operation for the given `code` and `syndrome`, or evaluate the success of
 decoding, as encapsulated in the decode result.
@@ -210,7 +215,8 @@ See also [`DecodeResult`](@ref).
 
 !!! note "Abstract method"
 
-    This method should be implemented for concrete subtypes of [`Decoder`](@ref).
+    This method should be implemented for concrete subtypes or duck-typed implementations of
+    [`Decoder`](@ref).
 """
 function decode end
 

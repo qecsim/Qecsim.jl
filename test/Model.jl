@@ -4,6 +4,15 @@ using Qecsim:QecsimError
 using Qecsim.BasicModels:BasicCode
 using Qecsim.PauliTools:to_bsf
 
+# test stub code using duck-typing
+struct _DuckCode end
+Model.label(::_DuckCode) = "duck-code"
+Model.stabilizers(::_DuckCode) = to_bsf(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"])
+Model.logical_xs(::_DuckCode) = to_bsf(["XXXXX"])
+Model.logical_zs(::_DuckCode) = to_bsf(["ZZZZZ"])
+Model.nkd(::_DuckCode) = (5, 1, 3)
+
+
 @testset "StabilizerCode" begin
     # 5-qubit code
     code = BasicCode(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"], ["XXXXX"], ["ZZZZZ"])
@@ -18,6 +27,13 @@ using Qecsim.PauliTools:to_bsf
     # Commuting logicals
     code = BasicCode(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"], ["IIIII"], ["IIIII"])
     @test_throws QecsimError validate(code)
+end
+
+@testset "StabilizerCode-duck-typing" begin
+    # duck code
+    code = _DuckCode()
+    @test logicals(code) == to_bsf(["XXXXX", "ZZZZZ"])
+    @test validate(code) === nothing
 end
 
 @testset "DecodeResult" begin

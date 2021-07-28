@@ -21,20 +21,36 @@ struct _FixedErrorModel <: ErrorModel
 end
 Model.label(::_FixedErrorModel) = "fixed"
 Model.generate(error_model::_FixedErrorModel, x...) = error_model.error
-
-# test stub decoder that decodes to a fixed given recovery
+# test stub decoder that decodes to a fixed given decode result
 struct _FixedDecoder <: Decoder
     result::DecodeResult
 end
 Model.label(::_FixedDecoder) = "fixed"
 Model.decode(decoder::_FixedDecoder, x...; kwargs...) = decoder.result
-
+# test stub decoder that decodes to a cycle of given decode results
 struct _CycleDecoder <: Decoder
     result_iter  # Iterator{DecodeResult}
     _CycleDecoder(results) = new(Iterators.Stateful(Iterators.Cycle(results)))
 end
 Model.label(::_CycleDecoder) = "cycle"
 Model.decode(decoder::_CycleDecoder, x...; kwargs...) = popfirst!(decoder.result_iter)
+
+
+# test stub code using duck-typing
+struct _DuckCode end
+Model.label(::_DuckCode) = "duck"
+Model.stabilizers(::_DuckCode) = to_bsf(["XZZXI", "IXZZX", "XIXZZ", "ZXIXZ"])
+Model.logical_xs(::_DuckCode) = to_bsf(["XXXXX"])
+Model.logical_zs(::_DuckCode) = to_bsf(["ZZZZZ"])
+Model.nkd(::_DuckCode) = (5, 1, 3)
+# test stub error model using duck-typing
+struct _DuckErrorModel end
+Model.label(::_DuckErrorModel) = "duck"
+Model.generate(::_DuckErrorModel, x...) = to_bsf("IIIII")
+# test stub decoder using duck-typing
+struct _DuckDecoder end
+Model.label(::_DuckDecoder) = "duck"
+Model.decode(::_DuckDecoder, x...; kwargs...) = DecodeResult(recovery=to_bsf("IIIII"))
 
 
 @testset "RunResult" begin
@@ -71,6 +87,14 @@ end
     @test_logs (:warn, "RECOVERY DOES NOT RETURN TO CODESPACE") #=
         =# data = qec_run_once(code, error_model, decoder, p)
     @test !data.success
+end
+
+@testset "qec_run_once-duck-typing" begin
+    data = qec_run_once(_DuckCode(), _DuckErrorModel(), _DuckDecoder(), 0.1)
+    @test data.success
+    @test !any(data.logical_commutations)
+    @test data.error_weight == 0
+    @test isnothing(data.custom_values)
 end
 
 @testset "qec_run_once-override" begin
@@ -120,7 +144,7 @@ end
     p = 0.25
     max_runs = 1000
     data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
-    JSON.print(data, 4)
+    # JSON.print(data, 4)
     expected_keys = Set([:code, :n_k_d, :time_steps, :error_model, :decoder,
         :error_probability, :measurement_error_probability, :n_run, :n_success, :n_fail,
         :n_logical_commutations, :custom_totals, :error_weight_total, :error_weight_pvar,
@@ -151,6 +175,14 @@ end
     delete!(data1, :wall_time)
     delete!(data2, :wall_time)
     @test data1 == data2
+end
+
+@testset "qec_run-duck-typing" begin
+    data = qec_run(_DuckCode(), _DuckErrorModel(), _DuckDecoder(), 0.1; max_runs=1000)
+    @test data[:n_success] == 1000
+    @test all(data[:n_logical_commutations] .== 0)
+    @test data[:error_weight_total] == 0
+    @test isnothing(data[:custom_totals])
 end
 
 @testset "qec_run-override" begin

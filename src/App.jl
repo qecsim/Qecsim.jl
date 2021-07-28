@@ -14,19 +14,17 @@ export RunResult, qec_run_once, qec_run
 
 """
     qec_run_once(code::StabilizerCode, error_model::ErrorModel, decoder::Decoder,
-                 p::Float64, rng::AbstractRNG=GLOBAL_RNG)
+                 p::Float64, rng::AbstractRNG=GLOBAL_RNG) -> RunResult
 
 Execute a stabilizer code error-decode-recovery (ideal) simulation and return run result.
 
+The parameters `code`, `error_model` and `decoder` should be concrete subtypes or duck-typed
+implementations of [`StabilizerCode`](@ref), [`ErrorModel`](@ref) and [`Decoder`](@ref),
+respectively.
+
 TODO: complete doc
 """
-function qec_run_once(
-    code::StabilizerCode,
-    error_model::ErrorModel,
-    decoder::Decoder,
-    p::Float64,
-    rng::AbstractRNG=GLOBAL_RNG
-)
+function qec_run_once(code, error_model, decoder, p::Float64, rng::AbstractRNG=GLOBAL_RNG)
     error = generate(error_model, code, p, rng)
     @debug "qec_run_once: error=$(error)" error
     syndrome = bsp(stabilizers(code), error)
@@ -65,8 +63,7 @@ end
 """
     RunResult(success::Bool, error_weight::Int,
               logical_commutations::Union{Nothing,AbstractVector{Bool}}
-              custom_values::Union{Nothing,Vector{<:Real}}
-              )
+              custom_values::Union{Nothing,Vector{<:Real}})
 
 Construct run result.
 
@@ -102,23 +99,20 @@ end
 
 
 """
-    qec_run(code::StabilizerCode, error_model::ErrorModel, decoder::Decoder,
-            p::Float64, random_seed;
+    qec_run(code, error_model, decoder, p::Float64, random_seed=nothing;
             max_runs::Union{Int,Nothing}=nothing, max_failures::Union{Int,Nothing}=nothing)
 
 Execute stabilizer code error-decode-recovery (ideal) simulations many times and return
 aggregated run data.
 
+The parameters `code`, `error_model` and `decoder` should be concrete subtypes or duck-typed
+implementations of [`StabilizerCode`](@ref), [`ErrorModel`](@ref) and [`Decoder`](@ref),
+respectively.
+
 TODO: complete doc
 """
-function qec_run(
-    code::StabilizerCode,
-    error_model::ErrorModel,
-    decoder::Decoder,
-    p::Float64,
-    random_seed=nothing;
-    max_runs::Union{Int,Nothing}=nothing,
-    max_failures::Union{Int,Nothing}=nothing,
+function qec_run(code, error_model, decoder, p::Float64, random_seed=nothing;
+    max_runs::Union{Int,Nothing}=nothing, max_failures::Union{Int,Nothing}=nothing,
 )
     # derived defaults
     max_runs = isnothing(max_runs) && isnothing(max_failures) ? 1 : max_runs
