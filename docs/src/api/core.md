@@ -7,18 +7,14 @@ Qecsim.QecsimError
 ```
 
 ## App
-```@meta
-CurrentModule = Qecsim.App
-```
 ```@docs
 App
 App.qec_run_once
+App.RunResult
+App.qec_run
 ```
 
 ## Model
-```@meta
-CurrentModule = Qecsim.Model
-```
 ```@docs
 Model
 ```
@@ -46,14 +42,11 @@ Model.probability_distribution
 ### Model.Decoder
 ```@docs
 Model.Decoder
-Model.DecodeResult
 Model.decode
+Model.DecodeResult
 ```
 
 ## PauliTools
-```@meta
-CurrentModule = Qecsim.PauliTools
-```
 ```@docs
 PauliTools
 PauliTools.bsp

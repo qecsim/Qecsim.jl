@@ -1,7 +1,7 @@
 using Test
 using Qecsim.BasicModels
 using Qecsim.Model
-using Qecsim.PauliTools: to_bsf
+using Qecsim.PauliTools:to_bsf
 
 
 @testset "BasicCode" begin

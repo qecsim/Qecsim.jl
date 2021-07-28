@@ -11,12 +11,12 @@ abstract type SimpleErrorModel <: ErrorModel end
     generate(error_model::SimpleErrorModel, code::StabilizerCode, p::Float64,
              [rng::AbstractRNG=GLOBAL_RNG]) -> BitVector
 
-Generate a new IID error based on [`probability_distribution`](@ref). See also
+Generate a new IID error based on [`Model.probability_distribution`](@ref). See also
 [`Model.generate`](@ref).
 
 !!! note
 
-    The method [`probability_distribution`](@ref) should be implemented for concrete
+    The method [`Model.probability_distribution`](@ref) should be implemented for concrete
     subtypes of [`SimpleErrorModel`](@ref).
 
 """
@@ -36,7 +36,7 @@ where ``p`` is the probability of an error on a single-qubit.
 """
 struct BitFlipErrorModel <: SimpleErrorModel end
 Model.label(::BitFlipErrorModel) = "Bit-flip"
-Model.probability_distribution(::BitFlipErrorModel, p::Float64) = (1-p, p, 0, 0)
+Model.probability_distribution(::BitFlipErrorModel, p::Float64) = (1 - p, p, 0., 0.)
 
 @doc raw"""
     BitPhaseFlipErrorModel <: SimpleErrorModel
@@ -46,7 +46,7 @@ where ``p`` is the probability of an error on a single-qubit.
 """
 struct BitPhaseFlipErrorModel <: SimpleErrorModel end
 Model.label(::BitPhaseFlipErrorModel) = "Bit-phase-flip"
-Model.probability_distribution(::BitPhaseFlipErrorModel, p::Float64) = (1-p, 0, p, 0)
+Model.probability_distribution(::BitPhaseFlipErrorModel, p::Float64) = (1 - p, 0., p, 0.)
 
 @doc raw"""
     DepolarizingErrorModel <: SimpleErrorModel
@@ -70,4 +70,4 @@ where ``p`` is the probability of an error on a single-qubit.
 """
 struct PhaseFlipErrorModel <: SimpleErrorModel end
 Model.label(::PhaseFlipErrorModel) = "Phase-flip"
-Model.probability_distribution(::PhaseFlipErrorModel, p::Float64) = (1-p, 0, 0, p)
+Model.probability_distribution(::PhaseFlipErrorModel, p::Float64) = (1 - p, 0., 0., p)

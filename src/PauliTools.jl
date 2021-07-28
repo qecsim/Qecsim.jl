@@ -8,7 +8,7 @@ export bsp, pack, unpack, to_bsf, to_pauli, weight
 
 @doc raw"""
     bsp(A::AbstractVecOrMat{Bool}, B::AbstractVecOrMat{Bool})
-        -> Union{Bool, BitVector, BitMatrix}
+        -> Union{Bool,BitVector,BitMatrix}
 
 Return the binary symplectic product of `A` with `B`, given in binary symplectic form.
 
@@ -48,14 +48,14 @@ function bsp(a::AbstractVecOrMat{Bool}, b::AbstractVecOrMat{Bool})
 end
 
 """
-    pack(bsf::AbstractVector{Bool}) -> Tuple{String, Int}
+    pack(bsf::AbstractVector{Bool}) -> Tuple{String,Int}
 
 Pack a binary vector into a concise representation, typically for log output. See also
 [`unpack`](@ref).
 
 # Examples
 ```jldoctest
-julia> a = BitVector([1, 0, 1, 0, 1, 1]);  # XYZ
+julia> a = BitVector([1, 0, 1, 0, 1, 1]);  # XZY
 
 julia> b = pack(a)  # (hex_value, length)
 ("2b", 6)
@@ -70,7 +70,7 @@ function pack(bsf::AbstractVector{Bool})
 end
 
 """
-    unpack(packed_bsf::Tuple{String, Int}) -> BitVector
+    unpack(packed_bsf::Tuple{String,Int}) -> BitVector
 
 Unpack a binary vector from a concise representation, typically from log output. See also
 [`pack`](@ref).
@@ -79,7 +79,7 @@ Unpack a binary vector from a concise representation, typically from log output.
 ```jldoctest
 julia> a = ("2b", 6);  # (hex_value, length)
 
-julia> b = unpack(a)  # XYZ
+julia> b = unpack(a)  # XZY
 6-element BitVector:
  1
  0
@@ -91,14 +91,14 @@ julia> pack(b) == a
 true
 ```
 """
-function unpack(packed_bsf::Tuple{String, Int})
+function unpack(packed_bsf::Tuple{String,Int})
     hex_str, len = packed_bsf
     val = parse(BigInt, hex_str; base=16)  # parse to val (BigInt to support long vectors)
     return reverse!(BitVector(digits(val; base=2, pad=len)))  # binary-digits as BitVector
 end
 
 """
-    to_bsf(pauli::Union{AbstractString, AbstractVector{<:AbstractString}})
+    to_bsf(pauli::Union{AbstractString,AbstractVector{<:AbstractString}})
 
 Convert the Pauli string operator(s) to binary symplectic form.
 
@@ -191,7 +191,7 @@ function weight(bsfs::AbstractMatrix{Bool})
 end
 
 """
-    weight(pauli::Union{AbstractString, AbstractVector{<:AbstractString}}) -> Int
+    weight(pauli::Union{AbstractString,AbstractVector{<:AbstractString}}) -> Int
 
 Return the weight of the Pauli string operator(s).
 

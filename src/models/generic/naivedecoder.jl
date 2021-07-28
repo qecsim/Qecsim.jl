@@ -26,7 +26,7 @@ function Model.decode(
         throw(ArgumentError("NaiveDecoder restricted to $(decoder.max_qubits) qubits"))
     end
     recovery = _minimum_weight_recovery(code, syndrome)
-    return DecodeResult(recovery)
+    return DecodeResult(recovery=recovery)
 end
 
 function _minimum_weight_recovery(code, syndrome)

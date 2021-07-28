@@ -4,9 +4,9 @@ Abstract types and methods for codes, error models and decoders.
 module Model
 
 # imports
-using ..Qecsim: QecsimError
-using ..PauliTools: bsp
-using LinearAlgebra: I
+using ..Qecsim:QecsimError
+using ..PauliTools:bsp
+using LinearAlgebra:I
 
 # exports
 # - abstract model
@@ -105,7 +105,7 @@ function logicals(code::StabilizerCode)
 end
 
 """
-    nkd(code::StabilizerCode) -> Tuple{Int, Int, Union{Int, Missing}}
+    nkd(code::StabilizerCode) -> Tuple{Int,Int,Union{Int,Missing}}
 
 Return a descriptor in the format `(n, k, d)`, where `n` is the number of physical qubits,
 `k` is the number of logical qubits, and `d` is the distance of the code (or `missing` if
@@ -129,7 +129,7 @@ If any of the following fail then a [`QecsimError`](@ref) is thrown:
 * ``L \odot L^T = \Lambda``
 
 where ``S`` and ``L`` are the code [`stabilizers`](@ref) and [`logicals`](@ref),
-respectively, and ``\odot`` and ``\Lambda`` are defined in [`bsp`](@ref).
+respectively, and ``\odot`` and ``\Lambda`` are defined in [`PauliTools.bsp`](@ref bsp).
 """
 function validate(code::StabilizerCode)
     s, l = stabilizers(code), logicals(code)
@@ -168,7 +168,7 @@ where `p` is typically the probability of an error on a single qubit.
 function generate end
 
 """
-    probability_distribution(error_model::ErrorModel, p::Float64) -> NTuple{4, Real}
+    probability_distribution(error_model::ErrorModel, p::Float64) -> NTuple{4,Real}
 
 Return the single-qubit probability distribution amongst Pauli I, X, Y and Z, where `p` is
 the overall probability of an error on a single qubit.
@@ -201,10 +201,12 @@ The syndrome has length equal to the number of code stabilizers, and element val
 or 1 (false or true) indicate whether the corresponding stabilizer does or does not commute
 with the error, respectively.
 
-Keyword parameters `kwargs` may be provided by the client with context values such as
-`error_model`, `error_probability` and `error`. Most implementations will ignore such
-parameters; however, if they are used, implementations should declare them explicitly and
-treat them as optional.
+Keyword parameters `kwargs` may be provided by the client, e.g. [`App`](@ref App), with
+context values such as `error_model`, `error_probability` and `error`. Most implementations
+will ignore such parameters; however, if they are used, implementations should declare them
+explicitly and treat them as optional.
+
+See also [`DecodeResult`](@ref).
 
 !!! note "Abstract method"
 
@@ -213,16 +215,76 @@ treat them as optional.
 function decode end
 
 """
-    DecodeResult(recovery::AbstractVector{Bool})
+    DecodeResult(success::Union{Nothing,Bool},
+                 recovery::Union{Nothing,AbstractVector{Bool}},
+                 logical_commutations::Union{Nothing,AbstractVector{Bool}}
+                 custom_values::Union{Nothing,AbstractVector{<:Real}})
 
-Construct a decoding result including the recovery operation.
+    DecodeResult(; success::Union{Nothing,Bool}=nothing,
+                 recovery::Union{Nothing,AbstractVector{Bool}}=nothing,
+                 logical_commutations::Union{Nothing,AbstractVector{Bool}}=nothing
+                 custom_values::Union{Nothing,AbstractVector{<:Real}}=nothing)
 
-!!! warning
+Construct a decoding result as returned by [`decode`](@ref).
 
-    In the future, this type will be extended to include success flags and more.
+Typically decoders will provide a `recovery` operation and delegate the evaluation of
+`success` and `logical_commutations` to the client, e.g. [`App`](@ref App). Optionally,
+`success` and/or `logical_commutations` may be provided as overrides. At least one of
+`recovery` or `success` must be specified to allow a success value to be resolved.
+Additionally `custom_values` may be specified. If `logical_commutations` and/or
+`custom_values` are provided then they should be of consistent type and size over
+identically parameterized simulation runs so that they can be summed across runs.
+
+See also [`decode`](@ref).
+
+# Examples
+```jldoctest
+julia> DecodeResult(; recovery=BitVector([1, 0, 1, 0, 1, 1]))  # typical use-case
+DecodeResult{Nothing}(nothing, Bool[1, 0, 1, 0, 1, 1], nothing, nothing)
+
+julia> DecodeResult(; success=true)  # override success
+DecodeResult{Nothing}(true, nothing, nothing, nothing)
+
+julia> DecodeResult(; success=false, logical_commutations=BitVector([1, 0]))  # override all
+DecodeResult{Nothing}(false, nothing, Bool[1, 0], nothing)
+
+julia> DecodeResult(; success=true, custom_values=[2.3, 4.1])  # custom values
+DecodeResult{Vector{Float64}}(true, nothing, nothing, [2.3, 4.1])
+
+julia> DecodeResult(true, nothing, nothing, [2.3, 4.1])  # positional parameters
+DecodeResult{Vector{Float64}}(true, nothing, nothing, [2.3, 4.1])
+
+julia> DecodeResult(; success=nothing, recovery=nothing)  # too few specified parameters
+ERROR: QecsimError: at least one of 'success' or 'recovery' must be specified
+Stacktrace:
+[...]
+```
 """
-struct DecodeResult
-    recovery::BitVector
+struct DecodeResult{T<:Union{Nothing,Vector{<:Real}}}
+    # Parametric type to avoid abstract types in struct, see:
+    # https://docs.julialang.org/en/v1/manual/performance-tips/#Type-declarations
+    # https://discourse.julialang.org/t/union-of-nothing-and-parametric-types/11986/5
+    success::Union{Nothing,Bool}
+    recovery::Union{Nothing,BitVector}
+    logical_commutations::Union{Nothing,BitVector}
+    custom_values::T
+    # lenient constructor that infers types
+    function DecodeResult(success, recovery, logical_commutations,
+                          custom_values::Union{Nothing,AbstractVector{S}}) where S<:Real
+        if isnothing(success) && isnothing(recovery)
+            throw(QecsimError("at least one of 'success' or 'recovery' must be specified"))
+        end
+        if isnothing(custom_values)
+            new{Nothing}(success, recovery, logical_commutations, custom_values)
+        else
+            new{Vector{S}}(success, recovery, logical_commutations, collect(custom_values))
+        end
+    end
+end
+# keyword convenience constructor
+function DecodeResult(; success=nothing, recovery=nothing, logical_commutations=nothing,
+                      custom_values=nothing)
+    DecodeResult(success, recovery, logical_commutations, custom_values)
 end
 
 end

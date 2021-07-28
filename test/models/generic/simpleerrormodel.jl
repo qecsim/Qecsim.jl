@@ -2,16 +2,16 @@ using Test
 
 using Qecsim.GenericModels
 using Qecsim.Model
-using Qecsim.BasicModels: FiveQubitCode
-using Qecsim.PauliTools: to_pauli
-using Random: MersenneTwister
+using Qecsim.BasicModels:FiveQubitCode
+using Qecsim.PauliTools:to_pauli
+using Random:MersenneTwister
 
 # utility test function
 function test_simpleerrormodel(
     error_model::SimpleErrorModel,
     p::Float64,
     expected_label::String,
-    expected_probability_distribution::NTuple{4, Real},
+    expected_probability_distribution::NTuple{4,Real},
     excluded_paulis::String=""
 )
     # label
@@ -35,23 +35,23 @@ end
 @testset "BitFlipErrorModel" begin
     error_model = BitFlipErrorModel()
     p = 0.1
-    test_simpleerrormodel(error_model, p, "Bit-flip", (1-p, p, 0, 0), "YZ")
+    test_simpleerrormodel(error_model, p, "Bit-flip", (1 - p, p, 0, 0), "YZ")
 end
 
 @testset "BitPhaseFlipErrorModel" begin
     error_model = BitPhaseFlipErrorModel()
     p = 0.1
-    test_simpleerrormodel(error_model, p, "Bit-phase-flip", (1-p, 0, p, 0), "XZ")
+    test_simpleerrormodel(error_model, p, "Bit-phase-flip", (1 - p, 0, p, 0), "XZ")
 end
 
 @testset "DepolarizingErrorModel" begin
     error_model = DepolarizingErrorModel()
     p = 0.1
-    test_simpleerrormodel(error_model, p, "Depolarizing", (1-p, p/3, p/3, p/3))
+    test_simpleerrormodel(error_model, p, "Depolarizing", (1 - p, p / 3, p / 3, p / 3))
 end
 
 @testset "PhaseFlipErrorModel" begin
     error_model = PhaseFlipErrorModel()
     p = 0.1
-    test_simpleerrormodel(error_model, p, "Phase-flip", (1-p, 0, 0, p), "XY")
+    test_simpleerrormodel(error_model, p, "Phase-flip", (1 - p, 0, 0, p), "XY")
 end

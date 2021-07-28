@@ -6,8 +6,8 @@ module BasicModels
 # imports
 import ..Model
 
-using ..Model: StabilizerCode
-using ..PauliTools: to_bsf
+using ..Model:StabilizerCode
+using ..PauliTools:to_bsf
 
 # exports
 export BasicCode, FiveQubitCode, SteaneCode
@@ -16,7 +16,7 @@ struct BasicCode <: StabilizerCode
     stablizers::BitMatrix
     logical_xs::BitMatrix
     logical_zs::BitMatrix
-    nkd::Tuple{Int, Int, Union{Int, Missing}}
+    nkd::Tuple{Int,Int,Union{Int,Missing}}
     label::String
 end
 """
