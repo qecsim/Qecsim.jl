@@ -22,7 +22,7 @@ The parameters `code`, `error_model` and `decoder` should be concrete subtypes o
 implementations of [`StabilizerCode`](@ref), [`ErrorModel`](@ref) and [`Decoder`](@ref),
 respectively.
 
-A simulation follows the following algorithm:
+The simulation algorithm is as follows:
 
 1. ``S ←`` `stabilizers(code)`
 2. ``L ←`` `logicals(code)`
@@ -30,9 +30,12 @@ A simulation follows the following algorithm:
 4. ``y ← S ⊙ e``
 5. `decode_result` ``←`` `decode(decoder, code,` ``y```; kwargs...)`
 6. ``r ←`` `decode_result.recovery`
-7. sanity check: ``S \odot (r \oplus e) = 0``
-8. `logical_commutations` ``← L \odot (r \oplus e)``
-8. `success` ``← L \odot (r \oplus e) = 0``
+7. sanity check: ``S ⊙ (r ⊕ e) = 0``
+8. `logical_commutations` ``← L ⊙ (r ⊕ e)``
+8. `success` ``← L ⊙ (r ⊕ e) = 0``
+
+where ``⊕`` denotes element-wise exclusive-or, and ``⊙`` is defined in
+[`PauliTools.bsp`](@ref bsp).
 
 The `kwargs` passed to [`decode`](@ref) include `error_model`, `p` and `error`; most
 decoders will ignore these parameters. The [`decode`](@ref) method returns a

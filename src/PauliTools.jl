@@ -12,9 +12,8 @@ export bsp, pack, unpack, to_bsf, to_pauli, weight
 
 Return the binary symplectic product of `A` with `B`, given in binary symplectic form.
 
-The binary symplectic product ``\odot`` is defined as
-``A \odot B \equiv A \Lambda B \bmod 2`` where
-``\Lambda = \left[\begin{smallmatrix} 0 & I \\ I & 0 \end{smallmatrix}\right]``.
+The binary symplectic product ``⊙`` is defined as ``A ⊙ B ≡ A Λ B \bmod 2`` where
+``Λ = \left[\begin{smallmatrix} 0 & I \\ I & 0 \end{smallmatrix}\right]``.
 
 # Examples
 ```jldoctest
