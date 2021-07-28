@@ -46,7 +46,15 @@ not. The value `decode_result.custom_values` is passed through in the run result
 
 See also [`RunResult`](@ref).
 
-TODO: doctest
+# Examples
+```jldoctest
+julia> using Qecsim.BasicModels, Qecsim.GenericModels, Random
+
+julia> rng = MersenneTwister(6);  # use random seed for reproducible result
+
+julia> qec_run_once(FiveQubitCode(), DepolarizingErrorModel(), NaiveDecoder(), 0.2, rng)
+RunResult{Nothing}(false, 2, Bool[1, 0], nothing)
+```
 """
 function qec_run_once(code, error_model, decoder, p::Float64, rng::AbstractRNG=GLOBAL_RNG)
     error = generate(error_model, code, p, rng)
@@ -91,7 +99,14 @@ end
 
 Construct a run result as returned by [`qec_run_once`](@ref).
 
-TODO: doctest
+# Examples
+```jldoctest
+julia> r = RunResult(false, 2, BitVector([0, 1]), [1.2, 3.1])
+RunResult{Vector{Float64}}(false, 2, Bool[0, 1], [1.2, 3.1])
+
+julia> r.success, r.error_weight, r.logical_commutations, r.custom_values
+(false, 2, Bool[0, 1], [1.2, 3.1])
+```
 """
 struct RunResult{T<:Union{Nothing,Vector{<:Real}}}
     success::Bool
