@@ -4,9 +4,7 @@ Basic stabilizer codes
 module BasicModels
 
 # imports
-import ..Model
-
-using ..Model:StabilizerCode
+using ..Model
 using ..PauliTools:to_bsf
 
 # exports

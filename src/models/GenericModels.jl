@@ -4,8 +4,6 @@ Generic error models and decoders compatible with any stabilizer codes.
 module GenericModels
 
 # imports
-import ..Model
-
 using ..Model
 using ..PauliTools:bsp, to_bsf
 using Combinatorics:combinations

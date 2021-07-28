@@ -1,10 +1,8 @@
-import Qecsim.Model
-
 using Test
 using Qecsim.App
 using Qecsim.BasicModels:FiveQubitCode
 using Qecsim.GenericModels:DepolarizingErrorModel, NaiveDecoder
-using Qecsim.Model:ErrorModel, Decoder, DecodeResult, logical_xs, logical_zs
+using Qecsim.Model:Model, ErrorModel, Decoder, DecodeResult, logical_xs, logical_zs
 using Qecsim.PauliTools:to_bsf
 using JSON
 using Random:MersenneTwister
