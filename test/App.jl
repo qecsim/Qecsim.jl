@@ -7,7 +7,6 @@ using Qecsim.PauliTools:to_bsf
 using JSON
 using Random:MersenneTwister
 
-# TODO: qec_run_once, RunResult, qec_run docs
 # TODO: qec_merge
 # TODO: CLI/file versions of qec_run and qec_merge
 # TODO: profiling / type-stability checks

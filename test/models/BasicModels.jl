@@ -10,8 +10,8 @@ using Qecsim.PauliTools:to_bsf
     pauli_logical_zs = ["ZZZZZ"]
     my_nkd = (5, 1, 3)
     my_label = "5-qubit"
-    code = BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs;
-        nkd=my_nkd, label=my_label)
+    code = BasicCode(pauli_stabilizers, pauli_logical_xs, pauli_logical_zs, my_nkd,
+                     my_label)
     @test nkd(code) == my_nkd
     @test label(code) == my_label
     @test stabilizers(code) == to_bsf(pauli_stabilizers)
