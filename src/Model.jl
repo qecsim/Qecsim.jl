@@ -160,7 +160,7 @@ Abstract supertype for error models.
 abstract type ErrorModel <: AbstractModel end
 
 """
-    generate(error_model, code, p::Float64, [rng::AbstractRNG=GLOBAL_RNG]) -> BitVector
+    generate(error_model, code, p::Real, [rng::AbstractRNG=GLOBAL_RNG]) -> BitVector
 
 Generate a new error in binary symplectic form according to the `error_model` and `code`,
 where `p` is typically the probability of an error on a single qubit.
@@ -173,7 +173,7 @@ where `p` is typically the probability of an error on a single qubit.
 function generate end
 
 """
-    probability_distribution(error_model, p::Float64) -> NTuple{4,Real}
+    probability_distribution(error_model, p::Real) -> NTuple{4,Real}
 
 Return the single-qubit probability distribution amongst Pauli I, X, Y and Z, where `p` is
 the overall probability of an error on a single qubit.

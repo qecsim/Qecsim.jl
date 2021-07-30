@@ -13,7 +13,7 @@ using Statistics:var
 export RunResult, qec_run_once, qec_run
 
 @doc raw"""
-    qec_run_once(code, error_model, decoder, p::Float64, rng::AbstractRNG=GLOBAL_RNG)
+    qec_run_once(code, error_model, decoder, p::Real, rng::AbstractRNG=GLOBAL_RNG)
         -> RunResult
 
 Execute a stabilizer code error-decode-recovery (ideal) simulation and return run result.
@@ -56,7 +56,7 @@ julia> qec_run_once(FiveQubitCode(), DepolarizingErrorModel(), NaiveDecoder(), 0
 RunResult{Nothing}(false, 2, Bool[1, 0], nothing)
 ```
 """
-function qec_run_once(code, error_model, decoder, p::Float64, rng::AbstractRNG=GLOBAL_RNG)
+function qec_run_once(code, error_model, decoder, p::Real, rng::AbstractRNG=GLOBAL_RNG)
     error = generate(error_model, code, p, rng)
     @debug "qec_run_once: error=$(error)" error
     syndrome = bsp(stabilizers(code), error)
@@ -138,7 +138,7 @@ end
 
 
 @doc raw"""
-    qec_run(code, error_model, decoder, p::Float64, random_seed=nothing;
+    qec_run(code, error_model, decoder, p::Real, random_seed=nothing;
             max_runs::Union{Int,Nothing}=nothing, max_failures::Union{Int,Nothing}=nothing)
         -> Dict
 
@@ -215,7 +215,7 @@ Dict{Symbol, Any} with 17 entries:
   :n_run                         => 100
 ```
 """
-function qec_run(code, error_model, decoder, p::Float64, random_seed=nothing;
+function qec_run(code, error_model, decoder, p::Real, random_seed=nothing;
     max_runs::Union{Int,Nothing}=nothing, max_failures::Union{Int,Nothing}=nothing,
 )
     # derived defaults

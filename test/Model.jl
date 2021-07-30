@@ -65,14 +65,21 @@ end
     # custom_values Int
     @test isa(DecodeResult(success=true, custom_values=[1, 2]), DecodeResult{Vector{Int}})
     @test isa(DecodeResult(true, nothing, nothing, [1, 2]), DecodeResult{Vector{Int}})
+    # custom_values Rational
+    @test isa(DecodeResult(success=true, custom_values=[1//2, 1//3]),
+        DecodeResult{Vector{Rational{Int}}})
+    @test isa(DecodeResult(true, nothing, nothing, [1//2, 1//3]),
+        DecodeResult{Vector{Rational{Int}}})
     # custom_values Float64
     @test isa(DecodeResult(success=true, custom_values=[1., 2.]),
         DecodeResult{Vector{Float64}})
-    @test isa(DecodeResult(true, nothing, nothing, [1., 2.]), DecodeResult{Vector{Float64}})
+    @test isa(DecodeResult(true, nothing, nothing, [1., 2.]),
+        DecodeResult{Vector{Float64}})
     # custom_values Int + Float64 promoted
     @test isa(DecodeResult(success=true, custom_values=[1, 2.]),
         DecodeResult{Vector{Float64}})
-    @test isa(DecodeResult(true, nothing, nothing, [1, 2.]), DecodeResult{Vector{Float64}})
+    @test isa(DecodeResult(true, nothing, nothing, [1, 2.]),
+        DecodeResult{Vector{Float64}})
     # invalid kwargs/args constructors throw exception
     @test_throws QecsimError DecodeResult()
     @test_throws QecsimError DecodeResult(nothing, nothing, nothing, nothing)

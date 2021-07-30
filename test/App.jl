@@ -71,18 +71,21 @@ end
     code = FiveQubitCode()
     error_model = DepolarizingErrorModel()
     decoder = NaiveDecoder()
-    p = 0.1
-    data = qec_run_once(code, error_model, decoder, p)
+    # float p
+    data = qec_run_once(code, error_model, decoder, 0.1)
+    @test !data.success || !any(data.logical_commutations)  # success -> zero commutator
+    # rational p
+    data = qec_run_once(code, error_model, decoder, 1//10)
     @test !data.success || !any(data.logical_commutations)  # success -> zero commutator
     # seeded run
-    data1 = qec_run_once(code, error_model, decoder, p, MersenneTwister(13))
-    data2 = qec_run_once(code, error_model, decoder, p, MersenneTwister(13))
+    data1 = qec_run_once(code, error_model, decoder, 0.1, MersenneTwister(13))
+    data2 = qec_run_once(code, error_model, decoder, 0.1, MersenneTwister(13))
     @test data1 == data2
     # warn: RECOVERY DOES NOT RETURN TO CODESPACE
     error_model = _FixedErrorModel(to_bsf("IIIII"))
     decoder = _FixedDecoder(DecodeResult(recovery=to_bsf("IIIIX")))
     @test_logs (:warn, "RECOVERY DOES NOT RETURN TO CODESPACE") #=
-        =# data = qec_run_once(code, error_model, decoder, p)
+        =# data = qec_run_once(code, error_model, decoder, 0.1)
     @test !data.success
 end
 
@@ -126,6 +129,15 @@ end
         # no-recovery but override success=false and logical_commutations=[1, 1]
         (DecodeResult(success=false, logical_commutations=[1, 1]),
             RunResult(false, 0, BitVector([1, 1]), nothing)),
+        # no-recovery but override success=false and custom_values=[1, 2]
+        (DecodeResult(success=false, custom_values=[1, 2]),
+            RunResult(false, 0, nothing, [1, 2])),
+        # no-recovery but override success=false and custom_values=[1., 2.]
+        (DecodeResult(success=false, custom_values=[1., 2.]),
+            RunResult(false, 0, nothing, [1., 2.])),
+        # no-recovery but override success=false and custom_values=[1//2, 1//3]
+        (DecodeResult(success=false, custom_values=[1//2, 1//3]),
+            RunResult(false, 0, nothing, [1//2, 1//3])),
     ]
         decoder = _FixedDecoder(decode_result)
         data = qec_run_once(code, error_model, decoder, p)
@@ -138,37 +150,40 @@ end
     code = FiveQubitCode()
     error_model = DepolarizingErrorModel()
     decoder = NaiveDecoder()
-    p = 0.25
     max_runs = 1000
-    data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
-    # JSON.print(data, 4)
-    expected_keys = Set([:code, :n_k_d, :time_steps, :error_model, :decoder,
-        :error_probability, :measurement_error_probability, :n_run, :n_success, :n_fail,
-        :n_logical_commutations, :custom_totals, :error_weight_total, :error_weight_pvar,
-        :logical_failure_rate, :physical_error_rate, :wall_time])
-    @test keys(data) == expected_keys
-    @test data[:n_run] == max_runs
-    @test data[:n_success] + data[:n_fail] == data[:n_run]
-    @test data[:n_success] >= 0 && data[:n_fail] >= 0
-    @test data[:n_fail] <= sum(data[:n_logical_commutations])
-    @test data[:logical_failure_rate] == data[:n_fail] / data[:n_run]
-    # physical_error_rate
-    p_rate = data[:physical_error_rate]
-    p_rate_std = sqrt(data[:error_weight_pvar] / (data[:n_k_d][1]^2))
-    @test p_rate - p_rate_std < p < p_rate + p_rate_std
-    # run count
-    data = qec_run(code, error_model, decoder, p)
-    @test data[:n_run] == 1
-    data = qec_run(code, error_model, decoder, p; max_runs=10)
-    @test data[:n_run] == 10
-    data = qec_run(code, error_model, decoder, p; max_failures=2)
-    @test data[:n_fail] == 2
-    data = qec_run(code, error_model, decoder, p; max_runs=10, max_failures=3)
-    @test ((data[:n_run] == 10 && data[:n_fail] <= 3)
-        || (data[:n_run] <= 10 && data[:n_fail] == 3))
+    for p in [0.25, 1//4]  # test with float and rational p
+        data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
+        # JSON.print(data, 4)
+        expected_keys = Set([:code, :n_k_d, :time_steps, :error_model, :decoder,
+            :error_probability, :measurement_error_probability, :n_run, :n_success, :n_fail,
+            :n_logical_commutations, :custom_totals, :error_weight_total,
+            :error_weight_pvar, :logical_failure_rate, :physical_error_rate, :wall_time])
+        @test keys(data) == expected_keys
+        @test data[:error_probability] == p
+        @test typeof(data[:error_probability]) == typeof(p)
+        @test data[:n_run] == max_runs
+        @test data[:n_success] + data[:n_fail] == data[:n_run]
+        @test data[:n_success] >= 0 && data[:n_fail] >= 0
+        @test data[:n_fail] <= sum(data[:n_logical_commutations])
+        @test data[:logical_failure_rate] == data[:n_fail] / data[:n_run]
+        # physical_error_rate
+        p_rate = data[:physical_error_rate]
+        p_rate_std = sqrt(data[:error_weight_pvar] / (data[:n_k_d][1]^2))
+        @test p_rate - p_rate_std < p < p_rate + p_rate_std
+        # run count
+        data = qec_run(code, error_model, decoder, p)
+        @test data[:n_run] == 1
+        data = qec_run(code, error_model, decoder, p; max_runs=10)
+        @test data[:n_run] == 10
+        data = qec_run(code, error_model, decoder, p; max_failures=2)
+        @test data[:n_fail] == 2
+        data = qec_run(code, error_model, decoder, p; max_runs=10, max_failures=3)
+        @test ((data[:n_run] == 10 && data[:n_fail] <= 3)
+            || (data[:n_run] <= 10 && data[:n_fail] == 3))
+    end
     # seeded run
-    data1 = qec_run(code, error_model, decoder, p, 13; max_runs=max_runs)
-    data2 = qec_run(code, error_model, decoder, p, 13; max_runs=max_runs)
+    data1 = qec_run(code, error_model, decoder, 0.1, 13; max_runs=max_runs)
+    data2 = qec_run(code, error_model, decoder, 0.1, 13; max_runs=max_runs)
     delete!(data1, :wall_time)
     delete!(data2, :wall_time)
     @test data1 == data2
@@ -204,7 +219,7 @@ end
             Dict(:n_success => 0, :n_fail => 4, :n_logical_commutations => [0, 0])),
         # identity but override logical_commutations=[1, 1]
         (_FixedDecoder(DecodeResult(recovery=identity, logical_commutations=[1, 1])), 5,
-            Dict(:n_success => 0, :n_success => 5, :n_fail => 0, :n_logical_commutations => [5, 5])),
+            Dict(:n_success => 5, :n_fail => 0, :n_logical_commutations => [5, 5])),
         # identity but override success=false and logical_commutations=[1, 1]
         (_FixedDecoder(DecodeResult(success=false, recovery=identity,
             logical_commutations=[1, 1])), 6,
@@ -221,10 +236,13 @@ end
         # no-recovery but override success=false and custom_values=[1., 1.]
         (_FixedDecoder(DecodeResult(success=false, custom_values=[1., 1.])), 10,
             Dict(:n_success => 0, :n_fail => 10, :custom_totals => [10., 10.])),
+        # no-recovery but override success=false and custom_values=[1//2, 1//3]
+        (_FixedDecoder(DecodeResult(success=false, custom_values=[1//2, 1//3])), 11,
+            Dict(:n_success => 0, :n_fail => 11, :custom_totals => [11//2, 11//3])),
         # no-recovery but override success=false/true and custom_values=[1, 1]/[2, 3]
         (_CycleDecoder([DecodeResult(success=false, custom_values=[1, 1]),
-            DecodeResult(success=true, custom_values=[2, 3])]), 11,
-            Dict(:n_success => 5, :n_fail => 6, :custom_totals => [16, 21])),
+            DecodeResult(success=true, custom_values=[2, 3])]), 12,
+            Dict(:n_success => 6, :n_fail => 6, :custom_totals => [18, 24])),
     ]
         data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
         @test issubset(expected, data)

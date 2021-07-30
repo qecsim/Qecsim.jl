@@ -8,7 +8,7 @@ qubits and a probability distribution.
 abstract type SimpleErrorModel <: ErrorModel end
 
 """
-    generate(error_model::SimpleErrorModel, code::StabilizerCode, p::Float64,
+    generate(error_model::SimpleErrorModel, code::StabilizerCode, p::Real,
              [rng::AbstractRNG=GLOBAL_RNG]) -> BitVector
 
 Generate a new IID error based on [`Model.probability_distribution`](@ref). See also
@@ -20,7 +20,7 @@ Generate a new IID error based on [`Model.probability_distribution`](@ref). See 
     subtypes of [`SimpleErrorModel`](@ref).
 
 """
-function Model.generate(error_model::SimpleErrorModel, code::StabilizerCode, p::Float64,
+function Model.generate(error_model::SimpleErrorModel, code::StabilizerCode, p::Real,
                         rng::AbstractRNG=GLOBAL_RNG)
     n_qubits = nkd(code)[1]
     weights = ProbabilityWeights(collect(probability_distribution(error_model, p)))
@@ -36,7 +36,9 @@ where ``p`` is the probability of an error on a single-qubit.
 """
 struct BitFlipErrorModel <: SimpleErrorModel end
 Model.label(::BitFlipErrorModel) = "Bit-flip"
-Model.probability_distribution(::BitFlipErrorModel, p::Float64) = (1 - p, p, 0., 0.)
+function Model.probability_distribution(::BitFlipErrorModel, p::Real)
+    return (1 - p, p, zero(p), zero(p))
+end
 
 @doc raw"""
     BitPhaseFlipErrorModel <: SimpleErrorModel
@@ -46,7 +48,9 @@ where ``p`` is the probability of an error on a single-qubit.
 """
 struct BitPhaseFlipErrorModel <: SimpleErrorModel end
 Model.label(::BitPhaseFlipErrorModel) = "Bit-phase-flip"
-Model.probability_distribution(::BitPhaseFlipErrorModel, p::Float64) = (1 - p, 0., p, 0.)
+function Model.probability_distribution(::BitPhaseFlipErrorModel, p::Real)
+    return (1 - p, zero(p), p, zero(0))
+end
 
 @doc raw"""
     DepolarizingErrorModel <: SimpleErrorModel
@@ -56,7 +60,7 @@ where ``p`` is the probability of an error on a single-qubit.
 """
 struct DepolarizingErrorModel <: SimpleErrorModel end
 Model.label(::DepolarizingErrorModel) = "Depolarizing"
-function Model.probability_distribution(::DepolarizingErrorModel, p::Float64)
+function Model.probability_distribution(::DepolarizingErrorModel, p::Real)
     px = py = pz = p / 3
     pi = 1 - sum((px, py, pz))
     return (pi, px, py, pz)
@@ -70,4 +74,6 @@ where ``p`` is the probability of an error on a single-qubit.
 """
 struct PhaseFlipErrorModel <: SimpleErrorModel end
 Model.label(::PhaseFlipErrorModel) = "Phase-flip"
-Model.probability_distribution(::PhaseFlipErrorModel, p::Float64) = (1 - p, 0., 0., p)
+function Model.probability_distribution(::PhaseFlipErrorModel, p::Real)
+    return (1 - p, zero(p), zero(p), p)
+end
