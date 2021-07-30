@@ -1,6 +1,6 @@
 # Qecsim.jl
 
-[comment] # [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://dkt29.github.io/Qecsim.jl/stable)
+<!-- [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://dkt29.github.io/Qecsim.jl/stable) -->
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://dkt29.github.io/Qecsim.jl/dev)
 [![Build Status](https://github.com/dkt29/Qecsim.jl/workflows/CI/badge.svg)](https://github.com/dkt29/Qecsim.jl/actions)
