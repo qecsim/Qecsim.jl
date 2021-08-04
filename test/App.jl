@@ -7,7 +7,7 @@ using Qecsim.PauliTools:to_bsf
 using JSON
 using Random:MersenneTwister
 
-# TODO: qec_merge
+# TODO: qec_merge test and doc
 # TODO: CLI/file versions of qec_run and qec_merge
 # TODO: profiling / type-stability checks
 
@@ -259,4 +259,20 @@ end
         decoder = _CycleDecoder(decode_results)
         @test_throws expected qec_run(code, error_model, decoder, p; max_runs=5)
     end
+end
+
+@testset "qec_merge" begin
+    # simple run
+    code = FiveQubitCode()
+    error_model = DepolarizingErrorModel()
+    decoder = NaiveDecoder()
+    p = 0.20
+    max_runs = 1000
+    data1 = qec_run(code, error_model, decoder, p; max_runs=max_runs)
+    # JSON.print(data1, 4)
+    data2 = qec_run(code, error_model, decoder, p; max_runs=max_runs)
+    # JSON.print(data2, 4)
+    merged_data = qec_merge(data1, data2)
+    # JSON.print(merged_data, 4)
+    # TODO: turn this into a proper test
 end

@@ -10,7 +10,7 @@ using Random:AbstractRNG, GLOBAL_RNG, MersenneTwister
 using Statistics:var
 
 # exports
-export RunResult, qec_run_once, qec_run
+export RunResult, qec_merge, qec_run_once, qec_run
 
 @doc raw"""
     qec_run_once(code, error_model, decoder, p::Real, rng::AbstractRNG=GLOBAL_RNG)
@@ -301,6 +301,53 @@ function _rate_statistics!(runs_data)
     runs_data[:logical_failure_rate] = n_fail / n_run
     runs_data[:physical_error_rate] = error_weight_total / nkd[1] / time_steps / n_run
     return nothing
+end
+
+function qec_merge(data...)
+    # define group keys, value keys and zero values
+    grp_keys = (:code, :n_k_d, :error_model, :decoder, :error_probability, :time_steps,
+                :measurement_error_probability)
+    scalar_val_keys = (:n_run, :n_fail, :n_success, :error_weight_total, :wall_time)
+    scalar_zero_vals = (0, 0, 0, 0, 0.0)
+    vector_val_keys = (:n_logical_commutations, :custom_totals,)
+    # map of groups to sums
+    grps_to_scalar_sums = Dict()
+    grps_to_vector_sums = Dict()
+    # iterate through single list from given data lists
+    for runs_data in data
+        # define defaults, create new data with defaults overwritten by data
+        # support for 0.10 and 0.15 files:
+        defaults_0_16 = Dict(:time_steps => 1, :measurement_error_probability => 0.0)
+        # support for pre-1.0b6 files:
+        defaults_1_0b6 = Dict(:n_logical_commutations => nothing, :custom_totals => nothing)
+        runs_data = Dict(defaults_0_16..., defaults_1_0b6..., runs_data...)
+        # extract group from data
+        grp_id = Tuple(runs_data[k] for k in grp_keys)
+        # scalars: e.g. (10, 6, 4, 256, 10.34) extracted from data
+        scalar_vals = Tuple(runs_data[k] for k in scalar_val_keys)
+        scalar_sums = get(grps_to_scalar_sums, grp_id, scalar_zero_vals)  # get sums
+        scalar_sums = Tuple(sum(x) for x in zip(scalar_sums, scalar_vals))  # update sums
+        grps_to_scalar_sums[grp_id] = scalar_sums  # put sums
+        # vectors: e.g. ([2, 5], [3, 8, 2], nothing) extracted from data
+        vector_vals = Tuple(_null_vec_copy(runs_data[k]) for k in vector_val_keys)
+        if haskey(grps_to_vector_sums, grp_id)  # sums already in map
+            vector_sums = grps_to_vector_sums[grp_id]  # get sums
+            vector_sums = Tuple(_null_vec_add!(s, v)  # update sums
+                                for (s, v) in zip(vector_sums, vector_vals))
+        else  # sums not in map yet
+            vector_sums = vector_vals  # update sums
+        end
+        grps_to_vector_sums[grp_id] = vector_sums  # put sums
+    end
+    # flatten grps_to_scalar_sums and grps_to_vector_sums
+    merged_data_list = [Dict(zip((grp_keys..., scalar_val_keys..., vector_val_keys...),
+                                 (grp_id..., scalar_sums..., grps_to_vector_sums[grp_id])))
+                        for (grp_id, scalar_sums) in grps_to_scalar_sums]
+    # update rate statistics
+    for runs_data in merged_data_list
+        _rate_statistics!(runs_data)
+    end
+    return merged_data_list
 end
 
 end
