@@ -23,7 +23,8 @@ end
     BasicCode(pauli_stabilizers::AbstractVector{<:AbstractString},
               pauli_logical_xs::AbstractVector{<:AbstractString},
               pauli_logical_zs::AbstractVector{<:AbstractString},
-              nkd::Tuple{Int,Int,Union{Int,Missing}}=nothing, label::AbstractString=nothing)
+              nkd::Tuple{Integer,Integer,Union{Integer,Missing}}=nothing,
+              label::AbstractString=nothing)
 
 Construct a basic code from string representations of stabilizers and logical operators.
 
@@ -36,7 +37,8 @@ logical qubit. Optional `nkd` defaults to `n` and `k` evaluated and `d` missing.
 ```jldoctest
 julia> using Qecsim.BasicModels
 
-julia> code = BasicCode(["ZZI", "IZZ"], ["XXX"], ["IIZ"]);  # 3-qubit repetition
+julia> code = BasicCode(["ZZI", "IZZ"], ["XXX"], ["IIZ"])  # 3-qubit repetition
+BasicCode(["ZZI", "IZZ"], ["XXX"], ["IIZ"], (3, 1, missing), "Basic [3,1,missing]")
 
 julia> validate(code)  # no error indicates operators satisfy commutation relations
 
@@ -51,14 +53,15 @@ function BasicCode(pauli_stabilizers::AbstractVector{<:AbstractString},
                     pauli_logical_xs::AbstractVector{<:AbstractString},
                     pauli_logical_zs::AbstractVector{<:AbstractString},
                     nkd=nothing, label=nothing)
-    nkd = !isnothing(nkd) ? nkd : (
+    # derived defaults (convert derived nkd type for derived label)
+    dnkd::Tuple{Int,Int,Union{Int,Missing}} = !isnothing(nkd) ? nkd : (
         length(pauli_stabilizers) > 0 ? length(pauli_stabilizers[1]) : 0,
         length(pauli_logical_xs),
         missing
     )
-    label = !isnothing(label) ? label : "Basic [$(nkd[1]),$(nkd[2]),$(nkd[3])]"
+    dlabel = !isnothing(label) ? label : "Basic [$(dnkd[1]),$(dnkd[2]),$(dnkd[3])]"
     return BasicCode(to_bsf(pauli_stabilizers), to_bsf(pauli_logical_xs),
-                     to_bsf(pauli_logical_zs), nkd, label)
+                     to_bsf(pauli_logical_zs), dnkd, dlabel)
 end
 Model.stabilizers(code::BasicCode) = code.stabilizers
 Model.logical_xs(code::BasicCode) = code.logical_xs

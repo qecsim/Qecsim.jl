@@ -86,10 +86,10 @@ function _resolve_decoding(recovery, success, logical_commutations, code, error)
     if !s_commutes
         @warn "RECOVERY DOES NOT RETURN TO CODESPACE" pack(error) pack(recovery)
     end
-    # apply overrides
-    resolved_success = isnothing(success) ? s_commutes && l_commutes : success
-    resolved_l_comms = isnothing(logical_commutations) ? l_comms : logical_commutations
-    return (resolved_success, resolved_l_comms)
+    # derived overrides
+    dsuccess = isnothing(success) ? s_commutes && l_commutes : success
+    dl_comms = isnothing(logical_commutations) ? l_comms : logical_commutations
+    return (dsuccess, dl_comms)
 end
 
 """
@@ -139,7 +139,8 @@ end
 
 @doc raw"""
     qec_run(code, error_model, decoder, p::Real, random_seed=nothing;
-            max_runs::Union{Int,Nothing}=nothing, max_failures::Union{Int,Nothing}=nothing)
+            max_runs::Union{Integer,Nothing}=nothing,
+            max_failures::Union{Integer,Nothing}=nothing)
         -> Dict
 
 Execute stabilizer code error-decode-recovery (ideal) simulations many times and return
@@ -216,13 +217,13 @@ Dict{Symbol, Any} with 17 entries:
 ```
 """
 function qec_run(code, error_model, decoder, p::Real, random_seed=nothing;
-    max_runs::Union{Int,Nothing}=nothing, max_failures::Union{Int,Nothing}=nothing,
+    max_runs::Union{Integer,Nothing}=nothing, max_failures::Union{Integer,Nothing}=nothing,
 )
     # derived defaults
-    max_runs = isnothing(max_runs) && isnothing(max_failures) ? 1 : max_runs
+    dmax_runs = isnothing(max_runs) && isnothing(max_failures) ? 1 : max_runs
 
-    @info "qec_run: starting" code = code error_model = error_model decoder = decoder p = p #=
-        =# random_seed = random_seed max_runs = max_runs max_failures = max_failures
+    @info "qec_run: starting" code = code error_model = error_model decoder = decoder #=
+        =# p = p random_seed = random_seed max_runs = dmax_runs max_failures = max_failures
     wall_time_start = time_ns()
 
     rng = MersenneTwister(random_seed)
@@ -231,12 +232,12 @@ function qec_run(code, error_model, decoder, p::Real, random_seed=nothing;
     # run counters
     n_run = n_success = 0
     error_weights = Int[]
-    if !isnothing(max_runs) sizehint!(error_weights, max_runs) end
+    if !isnothing(dmax_runs) sizehint!(error_weights, dmax_runs) end
     n_logical_commutations::Union{Nothing,Vector{Int}} = nothing  # promote to Int[]
     custom_totals = nothing
 
     # do runs
-    while ((isnothing(max_runs) || n_run < max_runs)
+    while ((isnothing(dmax_runs) || n_run < dmax_runs)
         && (isnothing(max_failures) || (n_run - n_success) < max_failures)
     )
         data = qec_run_once(code, error_model, decoder, p, rng)
