@@ -7,8 +7,10 @@ using Qecsim.PauliTools:to_bsf
 using JSON
 using Random:MersenneTwister
 
-# TODO: qec_merge test and doc
-# TODO: CLI/file versions of qec_run and qec_merge (or save_data/load_data)
+# TODO: qec_merge doctests
+# TODO: data to/from json methods?
+# TODO: qec_save/qec_load implementation (via JSON), tests and doc
+#       Note: always save and load a list of dict.
 # TODO: profiling / type-stability checks
 
 
@@ -262,7 +264,7 @@ end
 end
 
 @testset "qec_merge" begin
-    # simple run
+    # simple run twice
     code = FiveQubitCode()
     error_model = DepolarizingErrorModel()
     decoder = NaiveDecoder()
@@ -288,7 +290,14 @@ end
     @test all(typeof(merged_data[k]) == typeof(data1[k]) for k in keys(merged_data))
 end
 
-@testset "qec_merge-single" begin
+@testset "qec_merge-zero" begin
+    # no data to merge
+    merged_data_list = qec_merge()
+    # merged_data_list is a vector with no entries
+    @test length(merged_data_list) == 0
+end
+
+@testset "qec_merge-one" begin
     # simple run
     code = FiveQubitCode()
     error_model = DepolarizingErrorModel()

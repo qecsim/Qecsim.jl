@@ -12,6 +12,7 @@ App
 App.qec_run_once
 App.RunResult
 App.qec_run
+App.qec_merge
 ```
 
 ## Model

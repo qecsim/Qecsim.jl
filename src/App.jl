@@ -303,6 +303,19 @@ function _rate_statistics!(runs_data)
     return nothing
 end
 
+"""
+    qec_merge(data...) -> Vector{Dict}
+
+Merge simulation run data.
+
+Run data is expected in the format specified by [`qec_run`](@ref). Merged data is grouped
+by: `(:code, :n_k_d, :error_model, :decoder, :error_probability, :time_steps,
+:measurement_error_probability)`. The scalar values: `:n_run`, `:n_success`,
+`:n_fail`, `:error_weight_total` and `:wall_time` are summed. The vector values:
+`:n_logical_commutations` and `:custom_totals` are summed element-wise. The values:
+`:logical_failure_rate` and `:physical_error_rate` are recalculated. The value
+`:error_weight_pvar` is *not* currently recalculated and therefore omitted.
+"""
 function qec_merge(data...)
     # define group keys, value keys and zero values
     grp_keys = (:code, :n_k_d, :error_model, :decoder, :error_probability, :time_steps,
