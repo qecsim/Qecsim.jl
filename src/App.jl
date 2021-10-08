@@ -108,7 +108,7 @@ julia> r.success, r.error_weight, r.logical_commutations, r.custom_values
 (false, 2, Bool[0, 1], [1.2, 3.1])
 ```
 """
-struct RunResult{T<:Union{Nothing,Vector{<:Real}}}
+struct RunResult{T <: Union{Nothing,Vector{<:Real}}}
     success::Bool
     error_weight::Int
     logical_commutations::Union{Nothing,BitVector}
@@ -320,7 +320,8 @@ function qec_merge(data...)
         defaults_0_16 = Dict(:time_steps => 1, :measurement_error_probability => 0.0)
         # support for pre-1.0b6 files:
         defaults_1_0b6 = Dict(:n_logical_commutations => nothing, :custom_totals => nothing)
-        runs_data = Dict(defaults_0_16..., defaults_1_0b6..., runs_data...)
+        # runs_data = Dict(defaults_0_16..., defaults_1_0b6..., runs_data...)
+        runs_data = merge(defaults_0_16, defaults_1_0b6, runs_data)
         # extract group from data
         grp_id = Tuple(runs_data[k] for k in grp_keys)
         # scalars: e.g. (10, 6, 4, 256, 10.34) extracted from data
@@ -340,9 +341,10 @@ function qec_merge(data...)
         grps_to_vector_sums[grp_id] = vector_sums  # put sums
     end
     # flatten grps_to_scalar_sums and grps_to_vector_sums
-    merged_data_list = [Dict(zip((grp_keys..., scalar_val_keys..., vector_val_keys...),
-                                 (grp_id..., scalar_sums..., grps_to_vector_sums[grp_id])))
-                        for (grp_id, scalar_sums) in grps_to_scalar_sums]
+    merged_data_list = [Dict(
+        zip((grp_keys..., scalar_val_keys..., vector_val_keys...),
+            (grp_id..., scalar_sums..., grps_to_vector_sums[grp_id]...))
+        ) for (grp_id, scalar_sums) in grps_to_scalar_sums]
     # update rate statistics
     for runs_data in merged_data_list
         _rate_statistics!(runs_data)

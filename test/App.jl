@@ -8,7 +8,7 @@ using JSON
 using Random:MersenneTwister
 
 # TODO: qec_merge test and doc
-# TODO: CLI/file versions of qec_run and qec_merge
+# TODO: CLI/file versions of qec_run and qec_merge (or save_data/load_data)
 # TODO: profiling / type-stability checks
 
 
@@ -75,7 +75,7 @@ end
     data = qec_run_once(code, error_model, decoder, 0.1)
     @test !data.success || !any(data.logical_commutations)  # success -> zero commutator
     # rational p
-    data = qec_run_once(code, error_model, decoder, 1//10)
+    data = qec_run_once(code, error_model, decoder, 1 // 10)
     @test !data.success || !any(data.logical_commutations)  # success -> zero commutator
     # seeded run
     data1 = qec_run_once(code, error_model, decoder, 0.1, MersenneTwister(13))
@@ -136,8 +136,8 @@ end
         (DecodeResult(success=false, custom_values=[1., 2.]),
             RunResult(false, 0, nothing, [1., 2.])),
         # no-recovery but override success=false and custom_values=[1//2, 1//3]
-        (DecodeResult(success=false, custom_values=[1//2, 1//3]),
-            RunResult(false, 0, nothing, [1//2, 1//3])),
+        (DecodeResult(success=false, custom_values=[1 // 2, 1 // 3]),
+            RunResult(false, 0, nothing, [1 // 2, 1 // 3])),
     ]
         decoder = _FixedDecoder(decode_result)
         data = qec_run_once(code, error_model, decoder, p)
@@ -151,7 +151,7 @@ end
     error_model = DepolarizingErrorModel()
     decoder = NaiveDecoder()
     max_runs = 1000
-    for p in [0.25, 1//4]  # test with float and rational p
+    for p in [0.25, 1 // 4]  # test with float and rational p
         data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
         # JSON.print(data, 4)
         expected_keys = Set([:code, :n_k_d, :time_steps, :error_model, :decoder,
@@ -237,8 +237,8 @@ end
         (_FixedDecoder(DecodeResult(success=false, custom_values=[1., 1.])), 10,
             Dict(:n_success => 0, :n_fail => 10, :custom_totals => [10., 10.])),
         # no-recovery but override success=false and custom_values=[1//2, 1//3]
-        (_FixedDecoder(DecodeResult(success=false, custom_values=[1//2, 1//3])), 11,
-            Dict(:n_success => 0, :n_fail => 11, :custom_totals => [11//2, 11//3])),
+        (_FixedDecoder(DecodeResult(success=false, custom_values=[1 // 2, 1 // 3])), 11,
+            Dict(:n_success => 0, :n_fail => 11, :custom_totals => [11 // 2, 11 // 3])),
         # no-recovery but override success=false/true and custom_values=[1, 1]/[2, 3]
         (_CycleDecoder([DecodeResult(success=false, custom_values=[1, 1]),
             DecodeResult(success=true, custom_values=[2, 3])]), 12,
@@ -272,7 +272,37 @@ end
     # JSON.print(data1, 4)
     data2 = qec_run(code, error_model, decoder, p; max_runs=max_runs)
     # JSON.print(data2, 4)
-    merged_data = qec_merge(data1, data2)
-    # JSON.print(merged_data, 4)
-    # TODO: turn this into a proper test
+    # data1 and data2 are dicts of same length
+    @test length(data1) == length(data2)
+    merged_data_list = qec_merge(data1, data2)
+    # JSON.print(merged_data_list, 4)
+    # merged_data_list is a vector with one entry
+    @test length(merged_data_list) == 1
+    merged_data = merged_data_list[1]
+    # merged_data drops the error_weight_pvar key
+    @test length(merged_data) == length(data1) - 1
+    # merged_data preserves p and sums max_runs
+    @test merged_data[:error_probability] == p
+    @test merged_data[:n_run] == max_runs * 2
+    # all value types of merged_data match corresponding value types of data1
+    @test all(typeof(merged_data[k]) == typeof(data1[k]) for k in keys(merged_data))
+end
+
+@testset "qec_merge-single" begin
+    # simple run
+    code = FiveQubitCode()
+    error_model = DepolarizingErrorModel()
+    decoder = NaiveDecoder()
+    p = 0.20
+    max_runs = 1000
+    data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
+    merged_data_list = qec_merge(data)
+    # merged_data_list is a vector with one entry
+    @test length(merged_data_list) == 1
+    merged_data = merged_data_list[1]
+    # merged_data drops the error_weight_pvar key
+    @test length(merged_data) == length(data) - 1
+    # merged_data preserves p and sums max_runs
+    delete!(data, :error_weight_pvar)
+    @test merged_data == data
 end
