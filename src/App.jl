@@ -6,6 +6,7 @@ module App
 # imports
 using ..Model
 using ..PauliTools:bsp, pack, weight
+using JSON
 using Random:AbstractRNG, GLOBAL_RNG, MersenneTwister
 using Statistics:var
 
@@ -382,5 +383,30 @@ function qec_merge(data...)
     end
     return merged_data_list
 end
+
+function qec_write(io::IO, data...)
+    JSON.print(io, data)
+end
+function qec_write(filename::AbstractString, data...)
+    try
+        !ispath(filename) || error("File \"$filename\" exists. Refusing to overwrite.")
+    open(filename, "w") do io
+            qec_write(io, data...)
+        end
+    catch
+        @error "Recovered data: $(JSON.json(data))"
+        rethrow()
+    end
+end
+# function qec_write(io::IO, data::Vector{Dict{Symbol, Any}}) end
+# function qec_write(filename::AbstractString, data::Vector{Dict{Symbol, Any}}) end
+
+function qec_read(io::IO)::Vector{Dict{Symbol,Any}}
+    # load and check can be converted to expected format
+    data = convert(Vector{Dict{String,Any}},  JSON.parse(io))
+    # convert dicts to have Symbol keys
+    return [Dict(Symbol(k) => v for (k, v) in d) for d in data]
+end
+function qec_read(filename::AbstractString)::Vector{Dict{Symbol,Any}} end
 
 end
