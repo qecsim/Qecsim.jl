@@ -11,7 +11,7 @@ using Random:AbstractRNG, GLOBAL_RNG, MersenneTwister
 using Statistics:var
 
 # exports
-export RunResult, qec_merge, qec_run_once, qec_run
+export RunResult, qec_merge, qec_read, qec_run, qec_run_once, qec_write
 
 @doc raw"""
     qec_run_once(code, error_model, decoder, p::Real, rng::AbstractRNG=GLOBAL_RNG)
@@ -389,10 +389,10 @@ function qec_write(io::IO, data...)
 end
 function qec_write(filename::AbstractString, data...)
     try
+        # throw error if file exists
         !ispath(filename) || error("File \"$filename\" exists. Refusing to overwrite.")
-    open(filename, "w") do io
-            qec_write(io, data...)
-        end
+        # open(filename, "w") do io qec_write(io, data...) end
+        open(io -> qec_write(io, data...), filename, "w")
     catch
         @error "Recovered data: $(JSON.json(data))"
         rethrow()
@@ -402,11 +402,13 @@ end
 # function qec_write(filename::AbstractString, data::Vector{Dict{Symbol, Any}}) end
 
 function qec_read(io::IO)::Vector{Dict{Symbol,Any}}
-    # load and check can be converted to expected format
-    data = convert(Vector{Dict{String,Any}},  JSON.parse(io))
-    # convert dicts to have Symbol keys
+    # load into expected format
+    data::Vector{Dict{String,Any}} = JSON.parse(io)
+    # convert dict keys to Symbol
     return [Dict(Symbol(k) => v for (k, v) in d) for d in data]
 end
-function qec_read(filename::AbstractString)::Vector{Dict{Symbol,Any}} end
+function qec_read(filename::AbstractString)::Vector{Dict{Symbol,Any}}
+    return open(io -> qec_read(io), filename, "r")
+end
 
 end
