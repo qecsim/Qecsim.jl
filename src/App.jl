@@ -303,7 +303,7 @@ function _rate_statistics!(runs_data)
     return nothing
 end
 
-"""
+@doc raw"""
     qec_merge(data...) -> Vector{Dict}
 
 Merge simulation run data.
@@ -315,6 +315,23 @@ by: `(:code, :n_k_d, :error_model, :decoder, :error_probability, :time_steps,
 `:n_logical_commutations` and `:custom_totals` are summed element-wise. The values:
 `:logical_failure_rate` and `:physical_error_rate` are recalculated. The value
 `:error_weight_pvar` is *not* currently recalculated and therefore omitted.
+
+# Examples
+```jldoctest; filter = r":wall_time +=> \d*\.?\d*"
+julia> using Logging; Logging.disable_logging(Logging.Info);  # for brevity in doctest
+
+julia> using Qecsim.BasicModels, Qecsim.GenericModels
+
+julia> code, error_model, decoder = FiveQubitCode(), BitFlipErrorModel(), NaiveDecoder();
+
+julia> data1 = qec_run(code, error_model, decoder, 0.08, 19; max_runs=100);
+
+julia> data2 = qec_run(code, error_model, decoder, 0.08, 23; max_runs=100);
+
+julia> qec_merge(data1, data2)
+1-element Vector{Dict{Symbol, Any}}:
+ Dict(:measurement_error_probability => 0.0, :error_probability => 0.08, :time_steps => 1, :error_weight_total => 83, :n_logical_commutations => [11, 3], :wall_time => 0.231799012, :n_k_d => (5, 1, 3), :error_model => "Bit-flip", :n_success => 189, :logical_failure_rate => 0.055…)
+```
 """
 function qec_merge(data...)
     # define group keys, value keys and zero values

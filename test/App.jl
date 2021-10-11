@@ -7,7 +7,6 @@ using Qecsim.PauliTools:to_bsf
 using JSON
 using Random:MersenneTwister
 
-# TODO: qec_merge doctests
 # TODO: data to/from json methods?
 # TODO: qec_save/qec_load implementation (via JSON), tests and doc
 #       Note: always save and load a list of dict.
