@@ -7,8 +7,9 @@ module PauliTools
 export bsp, pack, unpack, to_bsf, to_pauli, weight
 
 @doc raw"""
-    bsp(A::AbstractVecOrMat{Bool}, B::AbstractVecOrMat{Bool})
-        -> Union{Bool,BitVector,BitMatrix}
+    bsp(
+        A::AbstractVecOrMat{Bool}, B::AbstractVecOrMat{Bool}
+    ) -> Union{Bool,BitVector,BitMatrix}
 
 Return the binary symplectic product of `A` with `B`, given in binary symplectic form.
 
@@ -97,8 +98,9 @@ function unpack(packed_bsf::Tuple{String,Int})
 end
 
 """
-    to_bsf(pauli::Union{AbstractString,AbstractVector{<:AbstractString}})
-        -> Union{BitVector,BitMatrix}
+    to_bsf(
+        pauli::Union{AbstractString,AbstractVector{<:AbstractString}}
+    ) -> Union{BitVector,BitMatrix}
 
 Convert the Pauli string operator(s) to binary symplectic form.
 

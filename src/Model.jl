@@ -221,15 +221,18 @@ See also [`DecodeResult`](@ref).
 function decode end
 
 """
-    DecodeResult(success::Union{Nothing,Bool},
-                 recovery::Union{Nothing,AbstractVector{Bool}},
-                 logical_commutations::Union{Nothing,AbstractVector{Bool}}
-                 custom_values::Union{Nothing,AbstractVector{<:Real}})
-
-    DecodeResult(; success::Union{Nothing,Bool}=nothing,
-                 recovery::Union{Nothing,AbstractVector{Bool}}=nothing,
-                 logical_commutations::Union{Nothing,AbstractVector{Bool}}=nothing
-                 custom_values::Union{Nothing,AbstractVector{<:Real}}=nothing)
+    DecodeResult(
+        success::Union{Nothing,Bool},
+        recovery::Union{Nothing,AbstractVector{Bool}},
+        logical_commutations::Union{Nothing,AbstractVector{Bool}}
+        custom_values::Union{Nothing,AbstractVector{<:Real}}
+    )
+    DecodeResult(;
+        success::Union{Nothing,Bool}=nothing,
+        recovery::Union{Nothing,AbstractVector{Bool}}=nothing,
+        logical_commutations::Union{Nothing,AbstractVector{Bool}}=nothing
+        custom_values::Union{Nothing,AbstractVector{<:Real}}=nothing
+    )
 
 Construct a decoding result as returned by [`decode`](@ref).
 

@@ -8,8 +8,9 @@ qubits and a probability distribution.
 abstract type SimpleErrorModel <: ErrorModel end
 
 """
-    generate(error_model::SimpleErrorModel, code, p::Real,
-             [rng::AbstractRNG=GLOBAL_RNG]) -> BitVector
+    generate(
+        error_model::SimpleErrorModel, code, p::Real, [rng::AbstractRNG=GLOBAL_RNG]
+    ) -> BitVector
 
 Generate a new IID error based on [`Model.probability_distribution`](@ref). See also
 [`Model.generate`](@ref).

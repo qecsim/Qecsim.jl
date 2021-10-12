@@ -14,8 +14,9 @@ using Statistics:var
 export RunResult, qec_merge, qec_read, qec_run, qec_run_once, qec_write
 
 @doc raw"""
-    qec_run_once(code, error_model, decoder, p::Real, rng::AbstractRNG=GLOBAL_RNG)
-        -> RunResult
+    qec_run_once(
+        code, error_model, decoder, p::Real, rng::AbstractRNG=GLOBAL_RNG
+    ) -> RunResult
 
 Execute a stabilizer code error-decode-recovery (ideal) simulation and return run result.
 
@@ -94,9 +95,12 @@ function _resolve_decoding(recovery, success, logical_commutations, code, error)
 end
 
 """
-    RunResult(success::Bool, error_weight::Int,
-              logical_commutations::Union{Nothing,BitVector}
-              custom_values::Union{Nothing,Vector{<:Real}})
+    RunResult(
+        success::Bool,
+        error_weight::Int,
+        logical_commutations::Union{Nothing,BitVector}
+        custom_values::Union{Nothing,Vector{<:Real}}
+    )
 
 Construct a run result as returned by [`qec_run_once`](@ref).
 
@@ -139,10 +143,11 @@ end
 
 
 @doc raw"""
-    qec_run(code, error_model, decoder, p::Real, random_seed=nothing;
-            max_runs::Union{Integer,Nothing}=nothing,
-            max_failures::Union{Integer,Nothing}=nothing)
-        -> Dict
+    qec_run(
+        code, error_model, decoder, p::Real, random_seed=nothing;
+        max_runs::Union{Integer,Nothing}=nothing,
+        max_failures::Union{Integer,Nothing}=nothing
+    ) -> Dict
 
 Execute stabilizer code error-decode-recovery (ideal) simulations many times and return
 aggregated run data, see [`qec_run_once`](@ref) for details of a single run.
@@ -217,7 +222,8 @@ Dict{Symbol, Any} with 17 entries:
   :n_run                         => 100
 ```
 """
-function qec_run(code, error_model, decoder, p::Real, random_seed=nothing;
+function qec_run(
+    code, error_model, decoder, p::Real, random_seed=nothing;
     max_runs::Union{Integer,Nothing}=nothing, max_failures::Union{Integer,Nothing}=nothing,
 )
     # derived defaults

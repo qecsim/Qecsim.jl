@@ -20,11 +20,13 @@ end
 """
     BasicCode <: StabilizerCode
 
-    BasicCode(pauli_stabilizers::AbstractVector{<:AbstractString},
-              pauli_logical_xs::AbstractVector{<:AbstractString},
-              pauli_logical_zs::AbstractVector{<:AbstractString},
-              nkd::Tuple{Integer,Integer,Union{Integer,Missing}}=nothing,
-              label::AbstractString=nothing)
+    BasicCode(
+        pauli_stabilizers::AbstractVector{<:AbstractString},
+        pauli_logical_xs::AbstractVector{<:AbstractString},
+        pauli_logical_zs::AbstractVector{<:AbstractString},
+        nkd::Tuple{Integer,Integer,Union{Integer,Missing}}=nothing,
+        label::AbstractString=nothing
+    )
 
 Construct a basic code from string representations of stabilizers and logical operators.
 
@@ -49,10 +51,13 @@ julia> label(code)  # default label
 "Basic [3,1,missing]"
 ```
 """
-function BasicCode(pauli_stabilizers::AbstractVector{<:AbstractString},
-                    pauli_logical_xs::AbstractVector{<:AbstractString},
-                    pauli_logical_zs::AbstractVector{<:AbstractString},
-                    nkd=nothing, label=nothing)
+function BasicCode(
+    pauli_stabilizers::AbstractVector{<:AbstractString},
+    pauli_logical_xs::AbstractVector{<:AbstractString},
+    pauli_logical_zs::AbstractVector{<:AbstractString},
+    nkd=nothing,
+    label=nothing
+)
     # derived defaults (convert derived nkd type for derived label)
     dnkd::Tuple{Int,Int,Union{Int,Missing}} = !isnothing(nkd) ? nkd : (
         length(pauli_stabilizers) > 0 ? length(pauli_stabilizers[1]) : 0,
