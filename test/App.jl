@@ -7,7 +7,6 @@ using Qecsim.PauliTools:to_bsf
 using JSON
 using Random:MersenneTwister
 
-# TODO: qec_read/qec_write doc
 # TODO: profiling / type-stability checks
 
 
@@ -273,19 +272,20 @@ end
     # JSON.print(data1, 4)
     data2 = qec_run(code, error_model, decoder, p; max_runs=max_runs)
     # JSON.print(data2, 4)
-    # data1 and data2 are dicts of same length
-    @test length(data1) == length(data2)
+    # data1 and data2 have same keys
+    @test keys(data1) == keys(data2)
     merged_data_list = qec_merge(data1, data2)
     # JSON.print(merged_data_list, 4)
     # merged_data_list is a vector with one entry
     @test length(merged_data_list) == 1
     merged_data = merged_data_list[1]
     # merged_data drops the error_weight_pvar key
-    @test length(merged_data) == length(data1) - 1
+    @test keys(merged_data) ⊆ keys(data1)
+    @test setdiff(keys(data1), keys(merged_data)) == Set([:error_weight_pvar])
     # merged_data preserves p and sums max_runs
     @test merged_data[:error_probability] == p
     @test merged_data[:n_run] == max_runs * 2
-    # all value types of merged_data match corresponding value types of data1
+    # all value types match
     @test all(typeof(merged_data[k]) == typeof(data1[k]) for k in keys(merged_data))
 end
 
@@ -298,16 +298,13 @@ end
     max_runs = 10
     data1 = qec_run(code, error_model, decoder, p1; max_runs=max_runs)
     data2 = qec_run(code, error_model, decoder, p2; max_runs=max_runs)
-    # data1 and data2 are dicts of same length
-    @test length(data1) == length(data2)
+    # data1 and data2 have same keys
+    @test keys(data1) == keys(data2)
     merged_data_list = qec_merge(data1, data2)
     # merged_data_list is a vector with two entries
     @test length(merged_data_list) == 2
     merged_data1 = merged_data_list[1]
     merged_data2 = merged_data_list[2]
-    # merged_data drops the error_weight_pvar key
-    @test length(merged_data1) == length(data1) - 1
-    @test length(merged_data2) == length(data2) - 1
     # merged_data preserves all values except :error_weight_pvar
     delete!(data1, :error_weight_pvar)
     @test merged_data1 == data1
@@ -329,8 +326,6 @@ end
     # merged_data_list is a vector with one entry
     @test length(merged_data_list) == 1
     merged_data = merged_data_list[1]
-    # merged_data drops the error_weight_pvar key
-    @test length(merged_data) == length(data) - 1
     # merged_data preserves all values except :error_weight_pvar
     delete!(data, :error_weight_pvar)
     @test merged_data == data
@@ -386,4 +381,17 @@ end
     open(io -> JSON.print(io, Dict(1 => '1')), filename, "w")
     # fail read invalid data
     @test_throws Exception qec_read(filename)
+end
+
+@testset "qec_read-qecsim-py-data" begin
+    # read data from Python version of Qecsim
+    data_py = qec_read(joinpath(@__DIR__, "./App_files/qecsim-py-data.json"))
+    # create local data
+    data = qec_run(FiveQubitCode(), BitFlipErrorModel(), NaiveDecoder(), 0.1; max_runs=10)
+    for d in data_py
+        # keys match
+        @test keys(d) == keys(data)
+        # all value types match
+        @test all(typeof(d[k]) == typeof(data[k]) for k in keys(data))
+    end
 end

@@ -1,5 +1,5 @@
 """
-Functions to run quantum error correction simulations and merge output data.
+Functions to run quantum error correction simulations and merge/read/write output data.
 """
 module App
 
@@ -384,6 +384,22 @@ function qec_merge(data...)
     return merged_data_list
 end
 
+@doc raw"""
+    qec_write(io::IO, data...)
+    qec_write(filename::AbstractString, data...)
+
+Write simulation run data to the given I/O stream or file.
+
+Run data is expected in the format specified by [`qec_run`](@ref) and written as a JSON
+array of objects using default JSON encoding. No checking of the format of the given data is
+performed. The file version of this method will refuse to overwrite an existing file,
+instead attempting to log the unwritten data and throwing an exception.
+
+The JSON format is compatible with the format used by the Python package
+[qecsim](https://github.com/qecsim/qecsim).
+
+See also [`qec_read`](@ref).
+"""
 function qec_write(io::IO, data...)
     JSON.print(io, data)
 end
@@ -398,6 +414,23 @@ function qec_write(filename::AbstractString, data...)
     end
 end
 
+@doc raw"""
+    qec_read(io::IO) -> Vector{Dict{Symbol,Any}}
+    qec_read(filename::AbstractString) -> Vector{Dict{Symbol,Any}}
+
+Read simulation run data from the given I/O stream or file.
+
+Run data is expected in the format written by [`qec_write`](@ref) (i.e. a JSON
+array of objects using default JSON encoding of the format specified by [`qec_run`](@ref)).
+The read data is converted to the specified return type as follows: dictionary keys are
+converted to symbols, `:n_k_d` entries are converted to tuples, and vector types are
+inferred from their elements. If this conversion fails, an exception is thrown.
+
+The JSON format is compatible with the format used by the Python package
+[qecsim](https://github.com/qecsim/qecsim).
+
+See also [`qec_write`](@ref).
+"""
 function qec_read(io::IO)::Vector{Dict{Symbol,Any}}
     # load into expected raw format
     raw_data::Vector{Dict{String,Any}} = JSON.parse(io)

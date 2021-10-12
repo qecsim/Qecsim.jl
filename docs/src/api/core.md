@@ -13,6 +13,8 @@ App.qec_run_once
 App.RunResult
 App.qec_run
 App.qec_merge
+App.qec_read
+App.qec_write
 ```
 
 ## Model
