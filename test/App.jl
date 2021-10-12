@@ -88,12 +88,15 @@ end
 end
 
 @testset "qec_run_once-duck-typing" begin
-    # duck-type simulation
+    # full duck-type simulation
     data = qec_run_once(_DuckCode(), _DuckErrorModel(), _DuckDecoder(), 0.1)
     @test data.success
     @test !any(data.logical_commutations)
     @test data.error_weight == 0
     @test isnothing(data.custom_values)
+    # mixed duck-type simulation (no exceptions thrown)
+    qec_run_once(_DuckCode(), _DuckErrorModel(), NaiveDecoder(), 0.1)  # no exception
+    qec_run_once(_DuckCode(), BitFlipErrorModel(), NaiveDecoder(), 0.1)  # no exception
 end
 
 @testset "qec_run_once-override" begin
@@ -189,12 +192,15 @@ end
 end
 
 @testset "qec_run-duck-typing" begin
-    # duck-type simulation
+    # full duck-type simulation
     data = qec_run(_DuckCode(), _DuckErrorModel(), _DuckDecoder(), 0.1; max_runs=10)
     @test data[:n_success] == 10
     @test all(data[:n_logical_commutations] .== 0)
     @test data[:error_weight_total] == 0
     @test isnothing(data[:custom_totals])
+    # mixed duck-type simulation (no exceptions thrown)
+    qec_run(_DuckCode(), _DuckErrorModel(), NaiveDecoder(), 0.1; max_runs=10)
+    qec_run(_DuckCode(), BitFlipErrorModel(), NaiveDecoder(), 0.1; max_runs=10)
 end
 
 @testset "qec_run-override" begin

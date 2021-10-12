@@ -17,10 +17,7 @@ struct NaiveDecoder <: Decoder
 end
 Model.label(::NaiveDecoder) = "Naive"
 function Model.decode(
-    decoder::NaiveDecoder,
-    code::StabilizerCode,
-    syndrome::AbstractVector{Bool};
-    kwargs...
+    decoder::NaiveDecoder, code, syndrome::AbstractVector{Bool}; kwargs...
 )
     if 0 <= decoder.max_qubits < nkd(code)[1]
         throw(ArgumentError("NaiveDecoder restricted to $(decoder.max_qubits) qubits"))

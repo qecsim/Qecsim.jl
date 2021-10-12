@@ -8,7 +8,7 @@ qubits and a probability distribution.
 abstract type SimpleErrorModel <: ErrorModel end
 
 """
-    generate(error_model::SimpleErrorModel, code::StabilizerCode, p::Real,
+    generate(error_model::SimpleErrorModel, code, p::Real,
              [rng::AbstractRNG=GLOBAL_RNG]) -> BitVector
 
 Generate a new IID error based on [`Model.probability_distribution`](@ref). See also
@@ -20,8 +20,9 @@ Generate a new IID error based on [`Model.probability_distribution`](@ref). See 
     subtypes of [`SimpleErrorModel`](@ref).
 
 """
-function Model.generate(error_model::SimpleErrorModel, code::StabilizerCode, p::Real,
-                        rng::AbstractRNG=GLOBAL_RNG)
+function Model.generate(
+    error_model::SimpleErrorModel, code, p::Real, rng::AbstractRNG=GLOBAL_RNG
+)
     n_qubits = nkd(code)[1]
     weights = ProbabilityWeights(collect(probability_distribution(error_model, p)))
     error_pauli = String(sample(rng, ['I','X','Y','Z'], weights, n_qubits))
