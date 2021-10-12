@@ -1,14 +1,13 @@
 using Test
 using Qecsim.App
 using Qecsim.BasicModels:FiveQubitCode
-using Qecsim.GenericModels:DepolarizingErrorModel, NaiveDecoder
+using Qecsim.GenericModels:BitFlipErrorModel, DepolarizingErrorModel, NaiveDecoder
 using Qecsim.Model:Model, ErrorModel, Decoder, DecodeResult, logical_xs, logical_zs
 using Qecsim.PauliTools:to_bsf
 using JSON
 using Random:MersenneTwister
 
-# TODO: qec_read/qec_write implementation (via JSON), tests and doc
-#       Note: always save and load a list of dict.
+# TODO: qec_read/qec_write doc
 # TODO: profiling / type-stability checks
 
 
@@ -67,7 +66,7 @@ Model.decode(::_DuckDecoder, x...; kwargs...) = DecodeResult(recovery=to_bsf("II
 end
 
 @testset "qec_run_once" begin
-    # simple run
+    # simulation parameters
     code = FiveQubitCode()
     error_model = DepolarizingErrorModel()
     decoder = NaiveDecoder()
@@ -90,6 +89,7 @@ end
 end
 
 @testset "qec_run_once-duck-typing" begin
+    # duck-type simulation
     data = qec_run_once(_DuckCode(), _DuckErrorModel(), _DuckDecoder(), 0.1)
     @test data.success
     @test !any(data.logical_commutations)
@@ -98,7 +98,7 @@ end
 end
 
 @testset "qec_run_once-override" begin
-    # common parameters
+    # common simulation parameters
     code = FiveQubitCode()
     identity = to_bsf("IIIII")
     error_model = _FixedErrorModel(identity)
@@ -146,7 +146,7 @@ end
 end
 
 @testset "qec_run" begin
-    # simple run
+    # simulation parameters
     code = FiveQubitCode()
     error_model = DepolarizingErrorModel()
     decoder = NaiveDecoder()
@@ -190,15 +190,16 @@ end
 end
 
 @testset "qec_run-duck-typing" begin
-    data = qec_run(_DuckCode(), _DuckErrorModel(), _DuckDecoder(), 0.1; max_runs=1000)
-    @test data[:n_success] == 1000
+    # duck-type simulation
+    data = qec_run(_DuckCode(), _DuckErrorModel(), _DuckDecoder(), 0.1; max_runs=10)
+    @test data[:n_success] == 10
     @test all(data[:n_logical_commutations] .== 0)
     @test data[:error_weight_total] == 0
     @test isnothing(data[:custom_totals])
 end
 
 @testset "qec_run-override" begin
-    # common parameters
+    # common simulation parameters
     code = FiveQubitCode()
     identity = to_bsf("IIIII")
     error_model = _FixedErrorModel(identity)
@@ -261,13 +262,13 @@ end
     end
 end
 
-@testset "qec_merge" begin
-    # simple run twice
+@testset "qec_merge-similar" begin
+    # similar simulation parameters
     code = FiveQubitCode()
     error_model = DepolarizingErrorModel()
     decoder = NaiveDecoder()
     p = 0.20
-    max_runs = 1000
+    max_runs = 10
     data1 = qec_run(code, error_model, decoder, p; max_runs=max_runs)
     # JSON.print(data1, 4)
     data2 = qec_run(code, error_model, decoder, p; max_runs=max_runs)
@@ -288,6 +289,32 @@ end
     @test all(typeof(merged_data[k]) == typeof(data1[k]) for k in keys(merged_data))
 end
 
+@testset "qec_merge-distinct" begin
+    # distinct simulation parameters
+    code = FiveQubitCode()
+    error_model = DepolarizingErrorModel()
+    decoder = NaiveDecoder()
+    p1, p2 = 0.1, 0.2
+    max_runs = 10
+    data1 = qec_run(code, error_model, decoder, p1; max_runs=max_runs)
+    data2 = qec_run(code, error_model, decoder, p2; max_runs=max_runs)
+    # data1 and data2 are dicts of same length
+    @test length(data1) == length(data2)
+    merged_data_list = qec_merge(data1, data2)
+    # merged_data_list is a vector with two entries
+    @test length(merged_data_list) == 2
+    merged_data1 = merged_data_list[1]
+    merged_data2 = merged_data_list[2]
+    # merged_data drops the error_weight_pvar key
+    @test length(merged_data1) == length(data1) - 1
+    @test length(merged_data2) == length(data2) - 1
+    # merged_data preserves all values except :error_weight_pvar
+    delete!(data1, :error_weight_pvar)
+    @test merged_data1 == data1
+    delete!(data2, :error_weight_pvar)
+    @test merged_data2 == data2
+end
+
 @testset "qec_merge-zero" begin
     # no data to merge
     merged_data_list = qec_merge()
@@ -296,20 +323,67 @@ end
 end
 
 @testset "qec_merge-one" begin
-    # simple run
-    code = FiveQubitCode()
-    error_model = DepolarizingErrorModel()
-    decoder = NaiveDecoder()
-    p = 0.20
-    max_runs = 1000
-    data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
+    # single simulation
+    data = qec_run(FiveQubitCode(), BitFlipErrorModel(), NaiveDecoder(), 0.1; max_runs=10)
     merged_data_list = qec_merge(data)
     # merged_data_list is a vector with one entry
     @test length(merged_data_list) == 1
     merged_data = merged_data_list[1]
     # merged_data drops the error_weight_pvar key
     @test length(merged_data) == length(data) - 1
-    # merged_data preserves p and sums max_runs
+    # merged_data preserves all values except :error_weight_pvar
     delete!(data, :error_weight_pvar)
     @test merged_data == data
+end
+
+@testset "qec_write_read" begin
+    # multiple simulation parameters
+    code = FiveQubitCode()
+    error_model = DepolarizingErrorModel()
+    decoder = NaiveDecoder()
+    p1, p2 = 0.08, 0.10
+    max_runs = 10
+    data = []
+    push!(data, qec_run(code, error_model, decoder, p1; max_runs=max_runs))
+    push!(data, qec_run(code, error_model, decoder, p2; max_runs=max_runs))
+    # JSON.print(data, 4)
+    # write data
+    filename = tempname()
+    qec_write(filename, data...)
+    # read data
+    data_read = qec_read(filename)
+    # JSON.print(data_read, 4)
+    @test data_read == data
+end
+
+@testset "qec_write-existing-file" begin
+    # single simulation
+    data = qec_run(FiveQubitCode(), BitFlipErrorModel(), NaiveDecoder(), 0.1; max_runs=10)
+    # write data
+    filename = tempname()
+    touch(filename)
+    # refuse to overwrite existing file
+    @test_throws ErrorException qec_write(filename, data...)
+end
+
+@testset "qec_write_read-empty-data" begin
+    # write empty data
+    filename = tempname()
+    qec_write(filename)
+    # read empty data
+    data_read = qec_read(filename)
+    @test data_read == Dict{Symbol,Any}[]
+end
+
+@testset "qec_read-invalid-data" begin
+    # write invalid data
+    filename = tempname()
+    touch(filename)
+    # fail read invalid data
+    @test_throws Exception qec_read(filename)
+    # write invalid data
+    filename = tempname()
+    open(io -> JSON.print(io, Dict(1 => '1')), filename, "w")
+    # fail read invalid data
+    @test_throws Exception qec_read(filename)
 end

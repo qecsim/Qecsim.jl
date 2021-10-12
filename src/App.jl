@@ -315,7 +315,7 @@ by: `(:code, :n_k_d, :error_model, :decoder, :error_probability, :time_steps,
 `:n_fail`, `:error_weight_total` and `:wall_time` are summed. The vector values:
 `:n_logical_commutations` and `:custom_totals` are summed element-wise. The values:
 `:logical_failure_rate` and `:physical_error_rate` are recalculated. The value
-`:error_weight_pvar` is *not* currently recalculated and therefore omitted.
+`:error_weight_pvar` is *not* currently recalculated and is therefore omitted.
 
 # Examples
 ```jldoctest; filter = r":wall_time +=> \d*\.?\d*"
@@ -390,22 +390,31 @@ end
 function qec_write(filename::AbstractString, data...)
     try
         # throw error if file exists
-        !ispath(filename) || error("File \"$filename\" exists. Refusing to overwrite.")
-        # open(filename, "w") do io qec_write(io, data...) end
+        !ispath(filename) || error("file \"$filename\" exists; refusing to overwrite")
         open(io -> qec_write(io, data...), filename, "w")
     catch
         @error "Recovered data: $(JSON.json(data))"
         rethrow()
     end
 end
-# function qec_write(io::IO, data::Vector{Dict{Symbol, Any}}) end
-# function qec_write(filename::AbstractString, data::Vector{Dict{Symbol, Any}}) end
 
 function qec_read(io::IO)::Vector{Dict{Symbol,Any}}
-    # load into expected format
-    data::Vector{Dict{String,Any}} = JSON.parse(io)
-    # convert dict keys to Symbol
-    return [Dict(Symbol(k) => v for (k, v) in d) for d in data]
+    # load into expected raw format
+    raw_data::Vector{Dict{String,Any}} = JSON.parse(io)
+    # convert type of keys to Symbol
+    data = [Dict(Symbol(k) => v for (k, v) in d) for d in raw_data]
+    # convert type of values
+    for d in data
+        if haskey(d, :n_k_d)  # convert type of :n_k_d to Tuple
+            d[:n_k_d] = Tuple(d[:n_k_d])
+        end
+        for (k, v) in d  # narrow type of vector values from Any
+            if isa(v, AbstractVector)
+                d[k] = [v...]
+            end
+        end
+    end
+    return data
 end
 function qec_read(filename::AbstractString)::Vector{Dict{Symbol,Any}}
     return open(io -> qec_read(io), filename, "r")
