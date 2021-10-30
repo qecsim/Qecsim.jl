@@ -99,7 +99,7 @@ end
         success::Bool,
         error_weight::Int,
         logical_commutations::Union{Nothing,BitVector}
-        custom_values::Union{Nothing,Vector{<:Real}}
+        custom_values::Union{Nothing,Vector}
     )
 
 Construct a run result as returned by [`qec_run_once`](@ref).
@@ -113,7 +113,7 @@ julia> r.success, r.error_weight, r.logical_commutations, r.custom_values
 (false, 2, Bool[0, 1], [1.2, 3.1])
 ```
 """
-struct RunResult{T <: Union{Nothing,Vector{<:Real}}}
+struct RunResult{T <: Union{Nothing,Vector}}
     success::Bool
     error_weight::Int
     logical_commutations::Union{Nothing,BitVector}
@@ -289,12 +289,15 @@ function qec_run(
     return runs_data
 end
 
-# return copy of val (or nothing if null)
+# return deepcopy of val (or nothing if null)
 _null_vec_copy(::Nothing) = nothing
-_null_vec_copy(val::AbstractVector) = copy(val)
-# update total adding val (or nothing if both null; MethodError if one and only one is null)
+_null_vec_copy(vec::AbstractVector) = deepcopy(vec)
+# sum scalars or vcat arrays
+_sum_vec_el(el1, el2) = el1 + el2
+_sum_vec_el(el1::AbstractArray, el2::AbstractArray) = vcat(el1, el2)
+# update vec1 with vec2 (sum scalars / vcat arrays) (or nothing if both null)
 _null_vec_add!(::Nothing, ::Nothing) = nothing
-_null_vec_add!(total::AbstractVector, val::AbstractVector) = total .+= val
+_null_vec_add!(vec1::AbstractVector, vec2::AbstractVector) = vec1 .= _sum_vec_el.(vec1,vec2)
 
 # set :logical_failure_rate and :physical_error_rate as defined in qec_run
 function _rate_statistics!(runs_data)
@@ -318,10 +321,12 @@ Merge simulation run data.
 Run data is expected in the format specified by [`qec_run`](@ref). Merged data is grouped
 by: `(:code, :n_k_d, :error_model, :decoder, :error_probability, :time_steps,
 :measurement_error_probability)`. The scalar values: `:n_run`, `:n_success`,
-`:n_fail`, `:error_weight_total` and `:wall_time` are summed. The vector values:
-`:n_logical_commutations` and `:custom_totals` are summed element-wise. The values:
-`:logical_failure_rate` and `:physical_error_rate` are recalculated. The value
-`:error_weight_pvar` is *not* currently recalculated and is therefore omitted.
+`:n_fail`, `:error_weight_total` and `:wall_time` are summed. The vector value:
+`:n_logical_commutations` is summed element-wise. The vector value: `:custom_totals` is
+summed element-wise for scalar elements and concatenated along dimension 1 (`vcat`) for
+array elements. The values: `:logical_failure_rate` and `:physical_error_rate` are
+recalculated. The value `:error_weight_pvar` is *not* currently recalculated and is
+therefore omitted.
 
 # Examples
 ```jldoctest; filter = r":wall_time +=> \d*\.?\d*"

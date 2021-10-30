@@ -225,13 +225,13 @@ function decode end
         success::Union{Nothing,Bool},
         recovery::Union{Nothing,AbstractVector{Bool}},
         logical_commutations::Union{Nothing,AbstractVector{Bool}}
-        custom_values::Union{Nothing,AbstractVector{<:Real}}
+        custom_values::Union{Nothing,AbstractVector}
     )
     DecodeResult(;
         success::Union{Nothing,Bool}=nothing,
         recovery::Union{Nothing,AbstractVector{Bool}}=nothing,
         logical_commutations::Union{Nothing,AbstractVector{Bool}}=nothing
-        custom_values::Union{Nothing,AbstractVector{<:Real}}=nothing
+        custom_values::Union{Nothing,AbstractVector}=nothing
     )
 
 Construct a decoding result as returned by [`decode`](@ref).
@@ -242,7 +242,9 @@ Typically decoders will provide a `recovery` operation and delegate the evaluati
 `recovery` or `success` must be specified to allow a success value to be resolved.
 Additionally `custom_values` may be specified. If `logical_commutations` and/or
 `custom_values` are provided then they should be of consistent type and size over
-identically parameterized simulation runs so that they can be summed across runs.
+identically parameterized simulation runs. For example, [`App`](@ref App) will sum
+`logical_commutations` across runs and, similarly, if `custom_values` are numbers they will
+be summed across runs, and if they are arrays they will be concatenated using `vcat`.
 
 See also [`decode`](@ref).
 
@@ -257,8 +259,11 @@ DecodeResult{Nothing}(true, nothing, nothing, nothing)
 julia> DecodeResult(; success=false, logical_commutations=BitVector([1, 0]))  # override all
 DecodeResult{Nothing}(false, nothing, Bool[1, 0], nothing)
 
-julia> DecodeResult(; success=true, custom_values=[2.3, 4.1])  # custom values
+julia> DecodeResult(; success=true, custom_values=[2.3, 4.1])  # custom values (numbers)
 DecodeResult{Vector{Float64}}(true, nothing, nothing, [2.3, 4.1])
+
+julia> DecodeResult(; success=true, custom_values=[[2.3], [4.1]])  # custom values (arrays)
+DecodeResult{Vector{Vector{Float64}}}(true, nothing, nothing, [[2.3], [4.1]])
 
 julia> DecodeResult(true, nothing, nothing, [2.3, 4.1])  # positional parameters
 DecodeResult{Vector{Float64}}(true, nothing, nothing, [2.3, 4.1])
@@ -269,7 +274,7 @@ Stacktrace:
 [...]
 ```
 """
-struct DecodeResult{T<:Union{Nothing,Vector{<:Real}}}
+struct DecodeResult{T<:Union{Nothing,Vector}}
     # Parametric type to avoid abstract types in struct, see:
     # https://docs.julialang.org/en/v1/manual/performance-tips/#Type-declarations
     # https://discourse.julialang.org/t/union-of-nothing-and-parametric-types/11986/5
@@ -279,7 +284,7 @@ struct DecodeResult{T<:Union{Nothing,Vector{<:Real}}}
     custom_values::T
     # lenient constructor that infers types
     function DecodeResult(success, recovery, logical_commutations,
-                          custom_values::Union{Nothing,AbstractVector{S}}) where S<:Real
+                          custom_values::Union{Nothing,AbstractVector{S}}) where S
         if isnothing(success) && isnothing(recovery)
             throw(QecsimError("at least one of 'success' or 'recovery' must be specified"))
         end

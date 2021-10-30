@@ -249,6 +249,14 @@ end
         (_CycleDecoder([DecodeResult(success=false, custom_values=[1, 1]),
             DecodeResult(success=true, custom_values=[2, 3])]), 12,
             Dict(:n_success => 6, :n_fail => 6, :custom_totals => [18, 24])),
+        # no-recovery but override success=false/true and custom_values=[1, [1.]]/[2, [3.]]
+        (_CycleDecoder([DecodeResult(success=false, custom_values=[1, [1.]]),
+            DecodeResult(success=true, custom_values=[2, [3.]])]), 2,
+            Dict(:n_success => 1, :n_fail => 1, :custom_totals => [3, [1., 3.]])),
+        # no-recovery but override success=false/true and custom_values=[1,[1 2]]/[2,[3 4]]
+        (_CycleDecoder([DecodeResult(success=false, custom_values=[1, [1 2]]),
+            DecodeResult(success=true, custom_values=[2, [3 4]])]), 2,
+            Dict(:n_success => 1, :n_fail => 1, :custom_totals => [3, [1 2; 3 4]])),
     ]
         data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
         @test issubset(expected, data)
@@ -335,6 +343,29 @@ end
     # merged_data preserves all values except :error_weight_pvar
     delete!(data, :error_weight_pvar)
     @test merged_data == data
+end
+
+@testset "qec_merge-custom_totals" begin
+    # similar simulation parameters
+    code = FiveQubitCode()
+    error_model = DepolarizingErrorModel()
+    decoder = _CycleDecoder([
+        DecodeResult(success=false, custom_values=[1, [1]]),
+        DecodeResult(success=true, custom_values=[2, [3]])
+    ])
+    p = 0.20
+    max_runs = 3
+    data1 = qec_run(code, error_model, decoder, p; max_runs=max_runs)
+    # JSON.print(data1, 4)
+    data2 = qec_run(code, error_model, decoder, p; max_runs=max_runs)
+    # JSON.print(data2, 4)
+    merged_data_list = qec_merge(data1, data2)
+    # JSON.print(merged_data_list, 4)
+    # merged_data_list is a vector with one entry
+    @test length(merged_data_list) == 1
+    merged_data = merged_data_list[1]
+    # check custom_totals as expected
+    @test merged_data[:custom_totals] == [9, [1, 3, 1, 3, 1, 3]]
 end
 
 @testset "qec_write_read" begin
