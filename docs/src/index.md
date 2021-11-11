@@ -46,7 +46,7 @@ with_logger(NullLogger()) do
     codes = [FiveQubitCode(), SteaneCode()]
     error_model = DepolarizingErrorModel()
     decoder = NaiveDecoder()
-    max_runs = 50
+    max_runs = 5000
     failure_rates = [[] for _ in codes]
     for p in error_probabilities, (code, f) in zip(codes, failure_rates)
         data = qec_run(code, error_model, decoder, p; max_runs=max_runs)
