@@ -198,7 +198,7 @@ julia> data = qec_run(FiveQubitCode(), DepolarizingErrorModel(), NaiveDecoder(),
 │   random_seed = 7
 │   max_runs = 100
 └   max_failures = nothing
-[ Info: qec_run: rng=MersenneTwister(7)
+[ Info: qec_run: rng=Random.MersenneTwister(7)
 [ Info: qec_run: complete: data=Dict{Symbol, Any}(:error_weight_pvar => 0.4075000000000001, :time_steps => 1, :n_logical_commutations => [5, 6], :error_weight_total => 55, :wall_time => 0.002539058, :n_k_d => (5, 1, 3), :error_model => "Depolarizing", :physical_error_rate => 0.11, :measurement_error_probability => 0.0, :error_probability => 0.1, :n_success => 92, :logical_failure_rate => 0.08, :custom_totals => nothing, :code => "5-qubit", :decoder => "Naive", :n_fail => 8, :n_run => 100)
 
 julia> data
